@@ -32,4 +32,8 @@ public class Person {
     public void setSsn(String ssn) {
         this.ssn = ssn;
     }
+
+    @Override
+    public String toString(){
+        return "이름: "+ this.name+", 주민번호 : "+this.ssn ;  }
 }
