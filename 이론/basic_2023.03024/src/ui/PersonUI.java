@@ -57,6 +57,9 @@ public class PersonUI {
             System.out.println("성공");
         }else{
             System.out.println("실패");
+            System.out.println("중복되는 주민번호가 있습니다. 이름을 재입력해주세요.");
+            String new_name=scString.nextLine();
+            //수정
         }
         
     }
