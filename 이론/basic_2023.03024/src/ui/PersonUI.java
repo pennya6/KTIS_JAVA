@@ -23,7 +23,7 @@ public class PersonUI {
                     registerPerson();
                     break;
                 case 2:
-                    printAll();
+                    AllPerson();  
                     break;
                 case 3:
                     deletePerson();
@@ -51,7 +51,7 @@ public class PersonUI {
         System.out.println("등록할 사람의 주민번호를 입력해주세요");
         String snn=scString.nextLine();
 
-        boolean result=manager.registerPerson(new Person(name,ssn));
+        boolean result=manager.registerPerson(new Person(name,snn));
 
         if(!result){
             System.out.println("성공");
