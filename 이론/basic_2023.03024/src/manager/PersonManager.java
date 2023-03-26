@@ -40,6 +40,14 @@ public class PersonManager {
         }
         return isDuplicated;
     }
+    public int checkPerson(String ssn){
+        for(int i=0;i<personlist.size();i++){
+            if(personlist.get(i).getSsn().equals(ssn)){
+                //동일한게 있다면
+                personlist.set(i,"");
+            }
+        }
+    }
 
     
 }
