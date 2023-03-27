@@ -35,8 +35,22 @@ public class PersonManager {
 
         for(int i=0;i< personlist.size();i++){
             if(personlist.get(i).getSsn().equals(snn)){
-                getPersonlist().remove(i);
+                personlist.remove(i);
                 result=true; //제거 완료
+            }
+        }
+        return result;
+    }
+
+    public boolean renamePerson(String snn,String name){
+        boolean result=false;
+
+        for(int i=0;i<personlist.size();i++){
+            if(personlist.get(i).getSsn().equals(snn)){
+                //주민등록번호가 같다면
+                //이름을 수정
+                personlist.get(i).setName(name);
+                result=true;
             }
         }
         return result;

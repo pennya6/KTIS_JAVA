@@ -55,6 +55,18 @@ public class PersonUI {
         }
     }
     public void renamePerson(){
+        System.out.println("수정할 주민번호를 입력하세요");
+        String re_snn=stScanner.nextLine();
+        System.out.println("수정한 등록자 이름을 입력하세요");
+        String re_name=stScanner.nextLine();
+        
+        boolean result=personManager.renamePerson(re_snn,re_name);
+        
+        if (result){
+            System.out.println("수정완료");
+        }else{
+            System.out.println("수정실패");
+        }
 
     }
     public void deletePerson(){
