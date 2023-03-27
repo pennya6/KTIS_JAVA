@@ -21,10 +21,8 @@ public class Person {
 
     @Override
     public String toString() {
-        return "Person{" +
-                "name='" + name + '\'' +
-                ", ssn='" + ssn + '\'' +
-                '}';
+        return "안녕하세요."+name+"님, 등록이 완료되었습니다.\n"+"주민번호는 "+ssn+"입니다."
+                ;
     }
 
     public String getName() {

@@ -13,4 +13,24 @@ public class PersonManager {
     //데이터 형식에 의존하지 않고 하나의 값이 여러다른 데이터 타입들을 가질 수 있도록 하는 방법
     //
     ArrayList<Person> personlist=new ArrayList<>();
+
+    //register
+    public boolean registerPerson(Person person){
+
+        boolean result=false; //중복 확인
+
+        //중복확인후 등록
+        for(int i=0;i<personlist.size();i++){
+            if(personlist.get(i).getSsn().equals(person.getSsn())){ //데이터 안의 주민번호와 신규등록자의 주민번호가 같다면
+                result=true; //중복임으로 실패
+            }
+        }
+        if(!result){
+            personlist.add(person);
+        }
+        return result;
+    }
+    public ArrayList<Person>getPersonlist(){
+        return personlist;
+    }
 }
