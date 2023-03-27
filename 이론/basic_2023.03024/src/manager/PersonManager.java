@@ -40,14 +40,20 @@ public class PersonManager {
         }
         return isDuplicated;
     }
-    public int checkPerson(String ssn){
+    public boolean Rename_Person(String ssn,String name){
+        boolean check=false;
         for(int i=0;i<personlist.size();i++){
+            //같은 주민번호를 찾으면
             if(personlist.get(i).getSsn().equals(ssn)){
-                //동일한게 있다면
-                personlist.set(i,"");
+                //이름을 바꿔라
+                System.out.println("동일한 주민번호 찾음");
+                personlist.get(i).setName(name);
+                check=true;
+                return check;
             }
         }
+        return check;
     }
 
-    
+
 }

@@ -29,6 +29,9 @@ public class PersonUI {
                     deletePerson();
                     break;
                 case 4:
+                    renamePerson();
+                    break;
+                case 5:
                     flag=false;
                     System.out.println("program finish");
                     break;
@@ -41,7 +44,8 @@ public class PersonUI {
         System.out.println("1.사람등록");
         System.out.println("2.사람조회");
         System.out.println("3.사람삭제");
-        System.out.println("4.등록부종료");
+        System.out.println("4.사람이름변경");
+        System.out.println("5.등록부종료");
         System.out.println("=========================");
     }
     //등록
@@ -57,9 +61,6 @@ public class PersonUI {
             System.out.println("성공");
         }else{
             System.out.println("실패");
-            System.out.println("중복되는 주민번호가 있습니다. 이름을 재입력해주세요.");
-            String new_name=scString.nextLine();
-            //수정
         }
         
     }
@@ -70,7 +71,7 @@ public class PersonUI {
         
         boolean result=manager.deletePerson(snn);
 
-        if (!result){
+        if (result){
             System.out.println("삭제완료");
         }else{
             System.out.println("실패");
@@ -82,5 +83,19 @@ public class PersonUI {
             System.out.println(person);
         }
         
+    }
+    public void renamePerson(){
+        System.out.println("수정할 사람의 주민번호를 입력해주세요");
+        String snn=scString.nextLine();
+        System.out.println("개명한 이름을 입력해주세요");
+        String name=scString.nextLine();
+
+        boolean result=manager.Rename_Person(snn,name);
+
+        if(!result){
+            System.out.println("fail");
+        }else{
+            System.out.println("ok");
+        }
     }
 }
