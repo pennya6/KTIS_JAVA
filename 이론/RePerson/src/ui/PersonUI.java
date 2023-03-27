@@ -1,0 +1,49 @@
+package ui;
+
+import java.util.Scanner;
+
+public class PersonUI {
+
+    private Scanner stScanner=new Scanner(System.in); //이름, 주민번호 입력시 사용
+    private Scanner inScanner=new Scanner(System.in); //choice 입력시 사용
+
+    private boolean flag=true; //프로그램 종료시 사용
+    private int choice; //menu choice
+
+    public void menu(){
+        while(flag){
+            System.out.println("안녕하세요. 등록부 프로그램입니다.\n 아래 내용을 보고 메뉴를 선택해주세요.\n1. 사람등록\n2. 사람조회 \n3. 사람이름수정\n4. 사람삭제\n5. 프로그램종료");
+            choice=inScanner.nextInt();//menu choice
+            switch (choice){
+                case 1: //사람등록
+                    registerPerson();
+                    break;
+                case 2: //사람조회
+                    AllPerson();
+                    break;
+                case 3: //사람 이름수정
+                    renamePerson();
+                    break;
+                case 4: //사람 삭제
+                    deletePerson();
+                    break;
+                case 5: //프로그램 종료
+                    flag=false; //boolean값 false로 수정
+                    break;
+            }
+        }
+    }
+    public void registerPerson(){
+
+    }
+    public void renamePerson(){
+
+    }
+    public void deletePerson(){
+
+    }
+    public void AllPerson(){
+
+    }
+
+}
