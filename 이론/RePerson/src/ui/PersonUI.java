@@ -58,6 +58,16 @@ public class PersonUI {
 
     }
     public void deletePerson(){
+        System.out.println("삭제할 주민번호을 입력하세요");
+        String delete_snn=stScanner.nextLine();
+        
+        boolean result= personManager.deletePerson(delete_snn);
+        
+        if(result){
+            System.out.println("삭제완료");
+        }else{
+            System.out.println("삭제실패");
+        }
 
     }
     public void AllPerson(){

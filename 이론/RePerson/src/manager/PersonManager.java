@@ -30,6 +30,18 @@ public class PersonManager {
         }
         return result;
     }
+    public boolean deletePerson(String snn){
+        boolean result=false;
+
+        for(int i=0;i< personlist.size();i++){
+            if(personlist.get(i).getSsn().equals(snn)){
+                getPersonlist().remove(i);
+                result=true; //제거 완료
+            }
+        }
+        return result;
+    }
+
     public ArrayList<Person>getPersonlist(){
         return personlist;
     }
