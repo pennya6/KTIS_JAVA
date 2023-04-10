@@ -1,7 +1,6 @@
 package com.example.inflearn;
 
 import com.example.inflearn.domain.Member;
-import com.example.inflearn.repository.MemoryMemberRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
