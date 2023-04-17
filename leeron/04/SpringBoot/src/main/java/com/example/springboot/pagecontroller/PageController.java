@@ -19,7 +19,7 @@ public class PageController {
     public String main(){
         return "index";
     }
-    @PostMapping("/signUp")
+    @PostMapping("/signup")
     //방법1
 //    public String signup(String memberId,String memberPw){
 //        System.out.println(memberId+memberPw);

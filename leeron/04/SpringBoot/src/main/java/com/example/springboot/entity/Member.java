@@ -18,7 +18,7 @@ public class Member {
     @Id
     @Column(name="id")
     private String memberId;
-    @Column(name="password")
+    @Column(name="pw")
     private String memberPw;
 
 //    public Member(){
