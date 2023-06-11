@@ -6,7 +6,10 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class MemberController {
+<<<<<<< HEAD
 
+=======
+>>>>>>> e1f168c9c60b0d41295eca62ab21cff921f4c6f8
     private final MemberService memberService;
 
     @Autowired
