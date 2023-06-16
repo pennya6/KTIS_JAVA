@@ -4,11 +4,16 @@ import hello.core.AppConfig;
 import hello.core.discount.DiscountPolicy;
 import hello.core.member.MemberRepository;
 import hello.core.member.MemoryMemberRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.session.NonUniqueSessionRepositoryException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.Assert;
+
+import java.util.Map;
 
 class ApplicationContextSameBeanFindTest {
     AnnotationConfigApplicationContext ac=new AnnotationConfigApplicationContext(SameBeanConfig.class);
@@ -16,18 +21,38 @@ class ApplicationContextSameBeanFindTest {
     @Test
     @DisplayName("타입으로 조회시 같은 타입이 둘이상 있으면, 중복 오류가 발생한다")
     void findBeanByTypeDuplicate(){
-        MemberRepository memberRepository=ac.getBean(MemberRepository.class);
+        //MemberRepository memberRepository=ac.getBean(MemberRepository.class);
+        Assertions.assertThrows(NonUniqueSessionRepositoryException.class,
+                ()->ac.getBean(MemberRepository.class));
+    }
+    @Test
+    @DisplayName("타입으로 조회시 같은 타입이 둘이상 있으면, 빈 이름을 지정하면 된다")
+    void findBeanByName(){
+        MemberRepository memberRepository=ac.getBean("memberRepository",MemberRepository.class);
+        org.assertj.core.api.Assertions.assertThat(memberRepository).isInstanceOf(MemberRepository.class);
     }
 
+    @Test
+    @DisplayName("특정타입을 모두 조회하기")
+    void findAllBeanByType(){
+        Map<String,MemberRepository> beansOfType=ac.getBeansOfType(MemberRepository.class);
+        for (String s : beansOfType.keySet()) {
+            System.out.println("s = " + s +"  value="+beansOfType.get(s));
+        }
+        System.out.println("beansOfType = " + beansOfType);
+        org.assertj.core.api.Assertions.assertThat(beansOfType.size()).isEqualTo(2);
+    }
+    
     @Configuration
-    static class SameBeanConfig{
+    static class SameBeanConfig {
         //org.springframework.beans.factory.NoUniqueBeanDefinitionException: error
         @Bean
-        public MemberRepository memberRepository(){
+        public MemberRepository memberRepository() {
             return new MemoryMemberRepository();
         }
+
         @Bean
-        public MemberRepository memberRepository2(){
+        public MemberRepository memberRepository2() {
             return new MemoryMemberRepository();
         }
     }
