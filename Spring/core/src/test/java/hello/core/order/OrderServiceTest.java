@@ -31,4 +31,10 @@ public class OrderServiceTest {
         //sout으로 test하는게 아니라 이런식으로 하기
         Assertions.assertThat(order.getDiscountPrice()).isEqualTo(1000);
     }
+
+    @Test
+    void createOrderNew(){
+        OrderServiceImpl service=new OrderServiceImpl();
+        orderService.createOrder(1L,"itemA",1000);
+    }
 }
