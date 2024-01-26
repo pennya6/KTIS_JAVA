@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>join</title>
+  <link rel="stylesheet" href="/resources/css/signup.css">
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-html">
+    <div class="login_logo">
+      <img src="/resources/img/common/kt-is-logo-c.png" alt="logo">
+      <input id="tab-1" type="radio" name="tab" class="sign-in" checked><label for="tab-1" class="tab">회원가입</label>
+    </div>
+    <input id="tab-2" type="radio" name="tab" class="sign-up"><label for="tab-2" class="tab">Sign Up</label>
+    <div class="login-form">
+      <form method="post" action="{% url 'signup' %}">
+        <div class="group">
+          <!-- <label for="id_username" class="label">아이디</label> -->
+          <input id="id_username" type="text" class="input" name="username"placeholder="아이디">
+        </div>
+        <div class="group">
+          <!-- <label for="id_password1" class="label">비밀번호</label> -->
+          <input id="id_password1" type="password" class="input" name="password1"placeholder="비밀번호">
+        </div>
+        <div class="group">
+          <!-- <label for="id_password2" class="label">비밀번호 확인</label> -->
+          <input id="id_password2" type="password" class="input" name="password2"placeholder="비밀번호 재확인">
+        </div>
+        <div class="group-group">
+          <div class="group">
+            <input id="last_name" type="text" class="input" name="last_name" placeholder="성">
+          </div>
+          <div class="group">
+            <input id="first_name" type="text" class="input" name="first_name" placeholder="이름">
+          </div>
+        </div>
+        <div class="group">
+          <!-- <label for="email" class="label">이메일</label> -->
+          <input id="email" type="text" class="input" name="email"placeholder="Email">
+        </div>
+        <div class="group">
+          <!-- <label for="department" class="label">소속부서</label> -->
+          <input id="department" type="text" class="input" name="department"placeholder="소속부서">
+        </div>
+        <div class="group">
+          <!-- <label for="company_id" class="label">회사 ID</label> -->
+          <input id="company_id" type="text" class="input" name="company_id"placeholder="회사ID">
+        </div>
+        <div class="group">
+          <label for="employee" class="employee_input">직원여부</label>
+          <input id="employee" type="checkbox" class="employee_input" name="employee">
+        </div>
+        <div class="group">
+          <button type="submit" class="button">회원가입</button>
+        </div>
+
+      </form>
+
+
+
+    </div>
+  </div>
+</div>
+<div class="login_tit">
+  <div class="fade_in">
+    <h1>기업회원으로 가입하고 상담데이터를 탐색해보세요. </h1>
+    <p>데이터를 다양한 차트로 시각화하여 인사이트를 발견하는데 도움이 됩니다. <br>
+      또한, 필터링 기능과 상호작용 가능한 그래프로 데이터 탐색을 더욱 효과적으로 만들어줍니다.</p>
+  </div>
+</div>
+
+
+</body>
+</html>
