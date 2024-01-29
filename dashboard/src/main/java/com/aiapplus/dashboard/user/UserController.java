@@ -1,5 +1,6 @@
 package com.aiapplus.dashboard.user;
 
+import com.aiapplus.dashboard.group.UserGroupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final UserGroupService userGroupService;
 
     @GetMapping("/")
     public String login(){
@@ -38,6 +40,12 @@ public class UserController {
         userService.create(userCreateForm.getUsername(),
                 userCreateForm.getPassword1(),userCreateForm.getEmail(),userCreateForm.getFirstName(),userCreateForm.getLastName(),
                 true,userCreateForm.getDepartment(),userCreateForm.getCompanyId(), LocalDateTime.now(),"미승인");
+
+        String username=userCreateForm.getUsername();
+        Long userId = userService.findUserIdByUsername(username);
+
+        userGroupService.create(userId,1);
+
         return "login";
     }
 

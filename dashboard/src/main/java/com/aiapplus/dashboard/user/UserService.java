@@ -31,5 +31,10 @@ public class UserService {
         this.userrepository.save(userInfo);
         return userInfo;
     }
+    public Long findUserIdByUsername(String username){
+        UserInfo user=userrepository.findUserIdByUsername(username);
+        return user.getId();
+
+    }
 
 }
