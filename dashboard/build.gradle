@@ -32,6 +32,13 @@ dependencies {
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client:2.7.4'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    implementation 'org.hibernate.validator:hibernate-validator:6.2.0.Final' // 최신 버전으로 업데이트하세요
+    // SLF4J API
+    implementation 'org.slf4j:slf4j-api:1.7.32'
+
+    // Logback Core and Classic modules
+    implementation 'ch.qos.logback:logback-core:1.2.3'
+    implementation 'ch.qos.logback:logback-classic:1.1.5'
 }
 
 tasks.named('test') {
