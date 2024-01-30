@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}"
+      xmlns:layout="http://www.w3.org/1999/xhtml" >
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -9,7 +10,7 @@
     <link rel="stylesheet" href="/resources/css/login.css">
 </head>
 <body>
-<form method="post" action="{% url 'login' %}">
+<form method="post" th:action="@{/}">
     <div class="login_bg">
         <div class="login_wrap">
             <div class="login_box">
@@ -17,12 +18,12 @@
                     <img src="/resources/img/common/kt-is-logo-c.png" alt="logo">
                 </div>
                 <div class="login_id">
-                    <label for="id">id</label>
-                    <input type="text" name="id">
+                    <label id="id" for="id" class="form-label">id</label>
+                    <input type="text" name="id" class="form-control">
                 </div>
                 <div class="login_pw">
-                    <label for="password">Password</label>
-                    <input type="password" name="password">
+                    <label id="password"for="password" class="form-label">Password</label>
+                    <input type="password" name="password"class="form-control">
                 </div>
                 <div class="line"></div>
                 <div class="login_button">

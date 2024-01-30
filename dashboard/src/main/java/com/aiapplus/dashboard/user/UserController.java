@@ -18,6 +18,7 @@ public class UserController {
 
     @GetMapping("/")
     public String login(){
+
         return "login";
     }
     @GetMapping("/signup")
