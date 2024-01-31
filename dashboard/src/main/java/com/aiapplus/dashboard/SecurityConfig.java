@@ -22,14 +22,20 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception{
         httpSecurity
-                .authorizeHttpRequests((authorizeHttpRequests)->authorizeHttpRequests
-                    .requestMatchers(new AntPathRequestMatcher("/**")).permitAll())
-        .csrf((csrf)->csrf
-                .ignoringRequestMatchers(new AntPathRequestMatcher("/h2-console/**")))
+                .authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
+                        .requestMatchers(new AntPathRequestMatcher("/**")).permitAll())
+                .csrf((csrf) -> csrf
+                        .ignoringRequestMatchers(new AntPathRequestMatcher("/h2-console/**")))
                 .headers((headers) -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(
                                 XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
-                .formLogin((formLogin)->formLogin.loginPage("/").defaultSuccessUrl("/dashboard"));
+                .formLogin((formLogin) -> formLogin
+                        .loginPage("/")
+                        .defaultSuccessUrl("/dashboard"))
+                .logout((logout) -> logout
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/user/logout"))
+                        .logoutSuccessUrl("/")
+                        .invalidateHttpSession(true));
         return httpSecurity.build();
     }
 

@@ -80,42 +80,36 @@
 <!--          </a>-->
 <!--        </li>-->
 <!--        {% elif user_groups == "dev"  %}-->
-        <li class="on">
-          <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/AI_AP_PLUS/">
-            <i class="ni ni-tv-2 text-primary"></i>
-            <span class="nav-link-text">대시보드</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/AI_AP_PLUS/data_analysis_result">
-            <i class="ni ni-tv-2 text-primary"></i>
-            <span class="nav-link-text">상담 추이</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/AI_AP_PLUS/stt_result">
-            <i class="ni ni-tv-2 text-primary"></i>
-            <span class="nav-link-text">상담녹취 결과</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/management/job">
-            <i class="ni ni-tv-2 text-primary"></i>
-            <span class="nav-link-text">업무 관리</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/setting/system_setting">
-            <i class="ni ni-tv-2 text-primary"></i>
-            <span class="nav-link-text">시스템 설정</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/management/batchtest">
-            <i class="ni ni-tv-2 text-primary"></i>
-            <span class="nav-link-text">단건 테스트</span>
-          </a>
-        </li>
+          <li class="on">
+              <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/dashboard}">
+                  <i class="ni ni-tv-2 text-primary"></i>
+                  <span class="nav-link-text">대시보드</span>
+              </a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/data_analysis_result}">
+                  <i class="ni ni-tv-2 text-primary"></i>
+                  <span class="nav-link-text">상담 추이</span>
+              </a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/stt_result}">
+                  <i class="ni ni-tv-2 text-primary"></i>
+                  <span class="nav-link-text">상담녹취 결과</span>
+              </a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/job}">
+                  <i class="ni ni-tv-2 text-primary"></i>
+                  <span class="nav-link-text">업무 관리</span>
+              </a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/system_setting}">
+                  <i class="ni ni-tv-2 text-primary"></i>
+                  <span class="nav-link-text">시스템 설정</span>
+              </a>
+          </li>
 <!--        {% endif  %}-->
     </div>
   </div>
@@ -176,23 +170,23 @@
     <div class="con_wrap" style="margin-bottom:0px;">
       <div class="account_box">
         <div class="user_img">
-          {% if user_groups == "user" %}
-          <img src="/static/assets/img/common/admin_img.png" alt="">
-          {% elif user_groups == "manager"%}
-          <img src="/static/assets/img/common/developer_img.png" alt="">
-          {% elif user_groups == "dev" %}
-          <img src="/static/assets/img/common/manage_img.png" alt="">
-          {% endif %}
+<!--          {% if user_groups == "user" %}-->
+<!--          <img src="/static/assets/img/common/admin_img.png" alt="">-->
+<!--          {% elif user_groups == "manager"%}-->
+<!--          <img src="/static/assets/img/common/developer_img.png" alt="">-->
+<!--          {% elif user_groups == "dev" %}-->
+<!--          <img src="/static/assets/img/common/manage_img.png" alt="">-->
+<!--          {% endif %}-->
         </div>
         <div class="user_box">
-          <div class="user_name">{{ request.user.username }}님</div>
+          <div th:text="'${#authentication.principal.username}님'"></div>
           <div class="access_time">{{request.user.last_login|date:"Y-m-d H:i:s"}}</div>
         </div>
         <div class="setting_box">
           <button class="setting_btn"><i class="fa-solid fa-gear"></i></button>
         </div>
         <div class="logout_box">
-          <a href="{% url 'logout' %}" class="logout_btn">
+          <a  th:href="@{/user/logout}" class="logout_btn">
             <i class="ni ni-support-16"></i>
             <i class="fa-solid fa-right-from-bracket"></i>
           </a>
@@ -203,7 +197,7 @@
       <div class="filter_box">
         <div class="filter_tit"><p>대시보드 검색조회</p></div>
         <form method="POST" action="">
-          {% csrf_token %}
+<!--          {% csrf_token %}-->
           <div class="date_select">
             <input type="text" name="start_date"id="start_date" value="{{start_date}}" placeholder="날짜 선택" readonly>
             <div>~</div>
@@ -227,7 +221,7 @@
             </div>
 
             <div class="type_check-2">
-              {% for cnslttype_group in cnslttype_group_items %}
+<!--              {% for cnslttype_group in cnslttype_group_items %}-->
               <div class="step{{cnslttype_group.type_id}}-1 step-b" style= "display: none;">
                 <ul>
 <!--                  {% for cnslttype in cnslttype_items %}-->

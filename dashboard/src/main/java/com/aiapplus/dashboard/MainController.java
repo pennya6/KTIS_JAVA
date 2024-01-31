@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class MainController {
-    @GetMapping("/dashboard")
-    public String login(){
-        return "dashboard";
-    }
+//    @GetMapping("/dashboard")
+//    public String login(){
+//        return "dashboard";
+//    }
 //    @GetMapping("/signup")
 //    public String signup(){
 //        return "signup";

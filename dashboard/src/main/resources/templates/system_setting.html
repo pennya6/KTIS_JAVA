@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>시스템설정</title>
+    <link rel="stylesheet" type="text/css" href="/resources/css/style.css">
+    <!--    font awesome-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!--    google font-->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!--  jqGrid-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.10.2.min.js" /></script>
+    <script type="text/javascript" src="https://code.jquery.com/ui/1.10.3/jquery-ui.min.js" /></script>
+    <link rel="stylesheet" type="text/css" href="/resources/js/jqgrid/css/ui.jqgrid.css" />
+    <script src="/resources/js/jqgrid/js/i18n/grid.locale-kr.js" type="text/javascript"></script>
+    <script src="/resources/js/jqgrid/js/minified/jquery.jqGrid.min.js" type="text/javascript"></script>
+    <!-- tree ui -->
+    <link rel="stylesheet" href="/resources/js/jstree/dist/themes/default/style.min.css" />
+    <script src="/resources/js/jstree/dist/jstree.min.js"></script>
+    <!--    datepicker-->
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script>
+        $(function () {
+            $('#jstree').jstree({
+                'plugins': ['checkbox']
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+
+            var data = [
+                {% for item in items %}
+            {
+                "role": "{{ item.group_name }}",
+                "name": "{{ item.last_name }}{{ item.first_name }}",
+                "department": "{{ item.department }}",
+                "date_joined": "{{ item.date_joined }}",
+                "status": "{{ item.status }}",
+                "email":"{{ item.email }}",
+                "id":"{{ itme.id}}",
+            },
+            {% endfor %}
+        ];
+
+            console.log(data)
+
+            $("#list10").jqGrid({
+
+                datatype: 'local',
+                data:data,
+                colNames: ['이름', '소속', '가입날짜', '승인여부','관리'],
+                colModel: [
+
+                    { name: 'name', width: 100, align: 'center' },
+                    { name: 'department', width: 120, align: 'center' },
+                    { name: 'date_joined', width: 120, align: 'center' },
+                    { name: 'status', width: 120, align: 'center' },
+                    {
+                        name: 'management',
+                        width:120,
+                        align: 'center',
+                        formatter: function (cellvalue, options, rowObject) {
+                            var htmlString = '<button class="info_btn" data-name="' + rowObject.name
+                                + '" data-department="' + rowObject.department
+                                + '" data-usernmae="' + rowObject.name
+                                + '" data-role="' + rowObject.role
+                                + '" data-date_joined="' + rowObject.date_joined
+                                + '" data-email="' + rowObject.email
+                                + '" data-id="' + rowObject.id
+                                + '" data-status="' + rowObject.status
+                                + '">' +'사용자 정보 수정 ' +
+                                '</button>'
+                            return htmlString;
+
+                        }
+                    }
+
+                ],
+                autowidth: true,
+                rownumbers : false,
+                multiselect: false,
+                pager:'#pager',
+                rowNum: 15,
+                sortname: 'id',
+                sortorder: 'asc',
+                height: 520,
+
+            });
+
+            $(window).on('resize.jqGrid', function() {
+                $("#list10").jqGrid('setGridWidth', $("#list10").parent().parent().parent().parent().parent().width());
+            })
+            $(".jarviswidget-fullscreen-btn").click(function(){
+                setTimeout(function() {
+                    $("#list10").jqGrid('setGridWidth', $("#list10").parent().parent().parent().parent().parent().width());
+                }, 100);
+            });
+        });
+    </script>
+
+    <script>
+        $(function(){
+            $("#datepicker, #datepicker2").datepicker();
+        });
+
+        // 상담유형선택 ui
+        $(function(){
+            $('.type_tit').click(function(){
+                $('.type_check').toggle();
+            });
+        });
+
+        // 팝업창 닫기
+        $(function(){
+            $(".close_btn").click(function(){
+                $(".stt_popup").addClass("none");
+                $(".popup_bg").addClass("none");
+                $(".popup_menu").addClass("none");
+            });
+        });
+
+        $(function(){
+            $(".tab_btn2").click(function(){
+                $(".tab_btn2").addClass("on");
+                $(".tab_btn1").removeClass("on");
+                $(".page1").addClass("none");
+                $(".page1").removeClass("block");
+                $(".page2").addClass("block");
+                $(".page2").removeClass("none");
+            });
+            $(".tab_btn1").click(function(){
+                $(".tab_btn1").addClass("on");
+                $(".tab_btn2").removeClass("on");
+                $(".page1").addClass("block");
+                $(".page1").removeClass("none");
+                $(".page2").addClass("none");
+                $(".page2").removeClass("block");
+            });
+        });
+
+        // 팝업창 닫기
+        $(function(){
+            $(".close_btn").click(function(){
+                $(".popup").addClass("none");
+                $(".popup_bg").addClass("none");
+            });
+        });
+
+
+        $(document).on('click','.info_btn',function(){
+            var name=$(this).data('name');
+            var department=$(this).data('department');
+            var date_joined=$(this).data('date_joined');
+            var role=$(this).data('role');
+            var email = $(this).data('email');
+            var status = $(this).data('status');
+
+            $("#popup_account").show();
+            // location.href=`?row-id=${rowId}`
+
+            document.getElementById("name").value=name;
+            document.getElementById("department").value=department;
+            document.getElementById("date_joined").value=date_joined;
+            document.getElementById("email").value=email;
+            // document.getElementById("username").value=username;
+
+            var selectElement = document.getElementById("role");
+
+            for (var i = 0; i < selectElement.options.length; i++) {
+                if (selectElement.options[i].value === role) {
+                    selectElement.options[i].selected = true;
+                    break;
+                }
+            }
+            var selectElement2 = document.getElementById("status");
+
+            for (var i = 0; i < selectElement2.options.length; i++) {
+                if (selectElement2.options[i].value === status) {
+                    selectElement2.options[i].selected = true;
+                    break;
+                }
+            }
+        });
+
+        $(document).on('click', '.cancel_btn', function(){
+            $("#popup_account").hide();
+            $("#popup_menu").hide();
+        });
+
+        $(document).on('click', '.ok_btn', function () {
+            $("#popup_account").hide();
+            $("#popup").show();
+        });
+
+        $(document).on('click', '.menu_btn', function(){
+            $("#popup_menu").show();
+        });
+
+        $(document).on('click', '.update_btn', function(){
+            $("#popup").hide();
+            var newRole = $('#role option:selected').val();
+            var csrf_token = $('input[name="csrfmiddlewaretoken"]').val();
+            var email=$('#email').val();
+            var newStatus=$('#status option:selected').val();
+            console.log(email,newStatus,newRole)
+
+            $.ajax({
+                type: 'POST',
+                url: '/setting/system_setting/',
+                data: {
+                    'role': newRole,
+                    'csrfmiddlewaretoken': csrf_token,
+                    'email':email,
+                    'status':newStatus
+                },
+                success: function (response) {
+                    console.log('권한 업데이트가 완료되었습니다.');
+                    console.log(newRole,email)
+                    location.reload()
+                },
+                error:function(error){
+                    location.reload()
+                }
+            });
+        });
+
+    </script>
+
+
+</head>
+<body>
+
+<div class="popup"id="popup" style="display:none;" >
+    <div class="popup_box">
+        <div class="popup_tit">Message <span class="close_btn"><i class="fa-solid fa-xmark"></i></span></div>
+        <div class="popup_con">
+            <div>
+                <div class="popup_message">수정하시겠습니까?</div>
+                <div style="width: 60px; margin: 0 auto; margin-top: 20px;"><button class="update_btn">확인</button></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="popup_bg" id="popup_bg" style="display:none;">
+    <div class="popup_bg">
+        <div class="popup_box">
+            <div class="popup_tit">Message <span class="close_btn"><i class="fa-solid fa-xmark"></i></span></div>
+            <div class="popup_con">
+                <div>
+                    <div class="popup_message">수정하시겠습니까?</div>
+                    <div style="width: 60px; margin: 0 auto; margin-top: 20px;"><button class="ok_btn">확인</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="popup_menu"id="popup_menu" style="display:none;" >
+    <div class="popup_box">
+        <div class="popup_tit">권한별 접속 가능 리스트 <span class="close_btn"><i class="fa-solid fa-xmark"></i></span></div>
+        <div class="popup_con" style="margin-top: 0;">
+            <div class="tree_tit">메뉴명</div>
+            <div class="tree_ui">
+                <div id="jstree" style="margin-top: 0;">
+                    <ul>
+                        <li>대시보드</li>
+                        <li>상담 추이</li>
+                        <li>STT 결과</li>
+                        <li>업무관리
+                            <ul>
+                                <li id="child_node_1">모델관리</li>
+                                <li>배치통합관리</li>
+                            </ul>
+                        </li>
+                        <li>시스템 설정
+                            <ul>
+                                <li id="child_node_2">계정통합관리</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div class="popup_account" id="popup_account" style="display:none;" >
+    <div class="popup_box">
+        <div class="popup_tit">사용자 정보 <span class="close_btn"></i></span></div>
+        <div class="popup_con">
+            <div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">이름</div>
+                    <div class="text_wrap"><input class="" type="text" name="" id="name"></div>
+                </div>
+                <!-- <div class="sett_wrap">
+                  <div class="detail_tit">아이디</div>
+                  <div class="text_wrap"><input type="text" name="" id="username"></div>
+                </div> -->
+                <div class="sett_wrap">
+                    <div class="detail_tit">소속</div>
+                    <div class="text_wrap"><input type="text" name="" id="department"></div>
+                </div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">권한</div>
+                    <!-- <div class="text_wrap"><input class="essen" type="text" name="" id="role"></div> -->
+                    <div class="text_wrap">
+                        <select class="essen" name="" id="role">
+                            <option value="사용자">사용자</option>
+                            <option value="매니저">매니저</option>
+                            <option value="관리자">관리자</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">이메일</div>
+                    <div class="text_wrap2"><input type="text" name="" id="email"></div>
+                </div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">등록일</div>
+                    <div class="text_wrap"><input type="text" name="" id="date_joined"></div>
+                </div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">상태</div>
+                    <!-- <div class="text_wrap"><input class="essen" type="text" name="" id="role"></div> -->
+                    <div class="text_wrap">
+                        <select class="essen" name="" id="status">
+                            <option value="승인">승인</option>
+                            <option value="미승인">미승인</option>
+                            <option value="미사용">미사용</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="sett_wrap">
+                    <div class="pop_btn_wrap" style="margin-top:50px;">
+                        <button class="ok_btn">수정</button>
+                        <button class="cancel_btn">취소</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="aside">
+    <div class="aside_wrap">
+        <div class="logo"><img src="/resources/img/common/kt-is-logo-c.png" alt="logo"></div>
+        <div class="menu">
+            <ul>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/dashboard}">
+                        <i class="ni ni-tv-2 text-primary"></i>
+                        <span class="nav-link-text">대시보드</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/data_analysis_result}">
+                        <i class="ni ni-tv-2 text-primary"></i>
+                        <span class="nav-link-text">상담 추이</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/stt_result}">
+                        <i class="ni ni-tv-2 text-primary"></i>
+                        <span class="nav-link-text">상담녹취 결과</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/job}">
+                        <i class="ni ni-tv-2 text-primary"></i>
+                        <span class="nav-link-text">업무 관리</span>
+                    </a>
+                </li>
+                <li class="on">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/system_setting}">
+                        <i class="ni ni-tv-2 text-primary"></i>
+                        <span class="nav-link-text">시스템 설정</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="main">
+    <div class="content">
+        <div class="con_wrap" style="margin-bottom: 0px;">
+            <div class="account_box">
+                <div class="user_img">
+                    {% if user_groups == "user" %}
+                    <img src="/static/assets/img/common/admin_img.png" alt="">
+                    {% elif user_groups == "manager"%}
+                    <img src="/static/assets/img/common/developer_img.png" alt="">
+                    {% elif user_groups == "dev" %}
+                    <img src="/static/assets/img/common/manage_img.png" alt="">
+                    {% endif %}
+                </div>
+                <div class="user_box">
+                    <div class="user_name">{{ request.user.username }}님</div>
+                    <div class="access_time">{{request.user.last_login|date:"Y-m-d H:i:s"}}</div>
+                </div>
+                <div class="setting_box">
+                    <button class="setting_btn"><i class="fa-solid fa-gear"></i></button>
+                </div>
+                <div class="logout_box">
+                    <a  th:href="@{/user/logout}" class="logout_btn">
+                        <i class="ni ni-support-16"></i>
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="con_wrap" style="overflow: visible; margin-top:0; margin-bottom:0;">
+            <div class="filter_box">
+                <div class="filter_tit"><p>계정 조회</p></div>
+                <!-- <div class="date_select" style="margin-left:10px;">
+                  <input type="text" id="datepicker" placeholder="날짜 선택" readonly>
+                  <div>~</div>
+                  <input type="text" id="datepicker2" placeholder="날짜 선택" readonly>
+                </div> -->
+                <!-- <button class="search_btn" style="margin-left: 10px;"><i class="fa-solid fa-magnifying-glass"></i> 조회</button> -->
+            </div>
+        </div>
+
+        <div class="con_wrap">
+            <div class="con_box">
+                <div class="box_1" style="height: auto;">
+                    <div class="con_wrap">
+                        <div class="half">
+                            <div class="page_tit">
+                                <div class="page_name">계정 통합 관리</div>
+                            </div>
+                        </div>
+                        <div class="half">
+                            <div class="set_btn_wrap">
+                                <!-- <button class="save_btn">저장</button>
+                                <button class="user_del_btn"><i class="fa-solid fa-xmark"></i> <span>사용자 삭제</span></button> -->
+                                <button class="menu_btn"><span>권한별 접속메뉴 정보</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="con_wrap">
+                        <div class="manage_box">
+                            <div class="manage01">
+                                <span>사용자수</span>
+                                <span>{{sum_approved_status}}명</span>
+                            </div>
+                            <div class="manage02">
+                                <span>승인대기</span>
+                                <span>{{sum_unapproved_status}}명</span>
+                            </div>
+                            <div class="manage03">
+                                <span>미사용 처리</span>
+                                <span>{{sum_no_user_status}}명</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="model_box_wrap">
+                        <div class="model_table">
+                            <div class="voc_table">
+                                <table id="list10"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>

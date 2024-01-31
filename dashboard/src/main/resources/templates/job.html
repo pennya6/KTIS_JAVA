@@ -1,0 +1,1274 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>업무지시</title>
+    <link rel="stylesheet" href="/resources/css/style.css">
+    <!--    font awesome-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!--    google font-->
+    <link
+            href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;600;700;800;900&display=swap"
+            rel="stylesheet">
+    <!--  jqGrid-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.10.2.min.js" />
+    </script>
+    <script type="text/javascript" src="https://code.jquery.com/ui/1.10.3/jquery-ui.min.js" />
+    </script>
+    <link rel="stylesheet" type="text/css" href="/static/assets/js/jqgrid/css/ui.jqgrid.css" />
+    <script src="/resources/js/jqgrid/js/i18n/grid.locale-kr.js" type="text/javascript"></script>
+    <script src="/resources/js/jqgrid/js/minified/jquery.jqGrid.min.js" type="text/javascript"></script>
+    <!-- tree ui -->
+    <link rel="stylesheet" href="/resources/js/jstree/dist/themes/default/style.min.css" />
+    <script src="/resources/js/jstree/dist/jstree.min.js"></script>
+    <!--    datepicker-->
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <script>
+
+        $(document).ready(function () {
+            //모델 관리 페이지, 정확도 그래프
+            function fetchDataAndDrawChart(url, chartId) {
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        var filteredData = data.filter(item => item.model_state === 'done');
+                        drawChart(filteredData, chartId);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error: " + error);
+                    }
+                });
+            }
+
+            function drawChart(data, chartId) {
+                var dates = data.map(item => item.model_update_date);
+                var accuracies = data.map(item => item.valid_accuracy);
+                var modelNames = data.map(item => item.model_name);
+
+                var ctx = document.getElementById(chartId).getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: 'Valid Accuracy',
+                            data: accuracies,
+                            fill: false,
+                            borderColor: 'rgba(2, 155, 212, 1)',
+                            pointBackgroundColor: 'rgba(2, 155, 212, 1)',
+                            pointBorderColor:  'rgba(2, 155, 212, 1)',
+                            tension: 0.1 // 선의 곡선 정도를 조절
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                display: false // 레전드 제거
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+
+                    }
+                });
+            }
+
+            fetchDataAndDrawChart("{% url 'AI_AP_PLUS:get_ai_models' model_type='VOC' %}", 'vocChart');
+            fetchDataAndDrawChart("{% url 'AI_AP_PLUS:get_ai_models' model_type='emotion' %}", 'emotionChart');
+            fetchDataAndDrawChart("{% url 'AI_AP_PLUS:get_ai_models' model_type='genderNage' %}", 'genderNageChart');
+
+            //모델 관리 페이지, 현재 모델 정보 확인 관련
+            function fetchModelData(modelType, dateElementId, nameElementId, accuracyElementId) {
+                var url = "/AI_AP_PLUS/get-ai-models/" + modelType + "/";
+                $.ajax({
+                    //url: "{% url 'AI_AP_PLUS:get_ai_models' model_type='" + modelType + "' %}",
+                    url: url,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        console.log(data);
+                        var filteredData = data.filter(function(item) {
+                            return item.use_yn === 'Y';
+                        });
+
+                        if (filteredData.length > 0) {
+                            var modelData = filteredData[0];
+                            $(dateElementId).text(modelData.model_update_date ? modelData.model_update_date.toString() : '-');
+                            $(nameElementId).text(modelData.model_name);
+                            $(accuracyElementId).text(modelData.valid_accuracy + '%');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.log("Error: " + error);
+                    }
+                });
+            }
+
+            fetchModelData('VOC', '#VOCModelDate', '#VOCModelName', '#VOCModelAccuracy');
+            fetchModelData('emotion', '#emotionModelDate', '#emotionModelName', '#emotionModelAccuracy');
+            fetchModelData('genderNage', '#genderNageModelDate', '#genderNageModelName', '#genderNageModelAccuracy');
+
+
+
+            //모델 관리 페이지, 모델들 정보 확인 관련
+            function createModelGrid(gridSelector, modelType) {
+                var url = "/AI_AP_PLUS/get-ai-models/" + modelType + "/";
+                $(gridSelector).jqGrid({
+                    //url: "{% url 'AI_AP_PLUS:get_ai_models' model_type='" + modelType + "' %}",
+                    url: url,
+                    datatype: 'json',
+                    autowidth : true,
+                    colModel: [
+                        //{ label: ' ', name: 'select', formatter: 'checkbox', formatoptions: { disabled: false }, width: 50, align: 'center' },
+                        { label: 'model id', name: 'model_id', hidden: true },
+                        {
+                            label: '상태', name: 'model_state', width: 50, align: 'center',
+                            formatter: function (cellvalue, options, rowObject) {
+                                if (cellvalue === 'done') {
+                                    return '<span style="color: green;">●</span>';
+                                } else if (cellvalue === 'error') {
+                                    return '<span style="color: red;">●</span>';
+                                } else {
+                                    return '<span style="color: orange;">●</span>';
+                                }
+                            }
+                        },
+                        { label: '날짜', name: 'model_update_date', width: 100, align: 'center' },
+                        { label: '이름', name: 'model_name', width: 120, align: 'center' },
+                        { label: '정확도', name: 'valid_accuracy', width: 50, align: 'center' },
+                    ],
+                    multiselect: true, // 다중 선택 활성화
+                    beforeSelectRow: function (rowid, e) {
+                        // 이미 선택된 행이 있으면 해제
+                        var selectedRows = $(this).jqGrid('getGridParam', 'selarrrow');
+                        if (selectedRows.length > 0 && $.inArray(rowid, selectedRows) === -1) {
+                            $(this).jqGrid('resetSelection'); // 모든 선택 해제
+                        }
+                        return true; // 행 선택 허용
+                    },
+                });
+            }
+
+            // 모델 관리 페이지에서 각 그리드 초기화
+            createModelGrid("#list11", 'VOC');
+            createModelGrid("#list12", 'emotion');
+            createModelGrid("#list13", 'genderNage');
+
+
+
+            // console.log(genderNage_valid_accuracy)
+
+            var batch_data = [
+                {% for item in items %}
+            {
+                batch_date: "{{ item.batch_date }}",
+                    batch_id: "{{ item.batch_id }}",
+                result: "{{ item.success_count }}/{{ item.total_count }}",
+                status: "{{ item.batch_status }}",
+                // detail_status : "{{ item.batch_detail_status }}",
+                // predict_percent : "{{ item.predict_percent }}",
+                // type : "{{ item.type }}"
+            },
+            {% endfor %}
+        ];
+
+            $("#batch_list").jqGrid({
+                datatype: 'local',
+                data: batch_data,
+                autowidth: false, // 자동 너비 조절 비활성화
+                width: 700,
+                height:120,
+                // rowNum:3,
+                // pager:'#pager',
+                multiselect: false,
+                colNames: ['날짜', '배치 ID', '결과', '상태'],
+                colModel: [
+                    { name: 'batch_date', index: 'batch_date', width: 50, align: 'center' },
+                    { name: 'batch_id', index: 'batch_id', width: 100, align: 'center' },
+                    { name: 'result', index: 'result', width: 100, align: 'center' },
+                    { name: 'status', index: 'status', width: 80, align: 'center' }
+                ],
+                onSelectRow: function (id) {
+                    const rowData = $("#batch_list").jqGrid('getRowData', id);
+                    const batchId = rowData.batch_id;
+
+                    // const predict_Percent = rowData.predict_percent;
+                    // const detail_Status = rowData.detail_status;
+                    // const type = rowData.type;
+
+                    $(".arrange_id input").val(batchId);
+
+                    $.ajax({
+                        type:"POST",
+                        url:"",
+                        data:{ batch_id:batchId },
+                        success:function(response){
+                            //window.history.pushState({}, '', `?batch_id=${batchId}`);
+
+                            var batch_data=response['batch_detail_log'];
+                            var model_result=response['model_result'];
+                            var voc_valid_accuracy=response['voc_valid_accuracy'];
+                            var genderNage_valid_accuracy=response['genderNage_valid_accuracy'];
+
+                            // console.log("batch_data:",batch_data)
+                            // console.log("model_result:",model_result)
+
+                            const data1=batch_data[0];
+                            const data2=batch_data[1];
+                            const data3=batch_data[2];
+                            const data4=batch_data[3];
+
+                            // console.log("data1:",data1)
+                            // console.log("data2:",data2)
+                            // console.log("data3:",data3)
+                            // console.log("data4:",data4)
+
+                            function findDataByType(data,model_result, type) {
+                                if (typeof data === 'object' && data !== null && model_result!==null) {
+                                    const values = Object.values(data);
+                                    console.log("values:",values)
+
+                                    const model_values=Object.values(model_result);
+                                    console.log("model_values:",model_values)
+                                    const item = values[6];
+
+                                    if (item === type.toLowerCase()) {
+                                        return [values[3], values[5],model_values[0]['age'],model_values[0]['category_3'],model_values[0]['emotion'],model_values[0]['gender']]; //성공실패여부, prediction 값, 나이, voc, 감정, 성별
+                                    }
+                                    return [values[3], values[5],model_values[0]['age'],model_values[0]['category_3'],model_values[0]['emotion'],model_values[0]['gender']]; //성공실패여부, prediction 값, 나이, voc, 감정, 성별
+                                }
+                                return null;
+                            }
+                            function processDataAndApplyToDOM(result, selector,text) {
+
+                                if (result !== null) {
+                                    var status = result[0];
+
+                                    var element = document.querySelector(selector);
+
+                                    if (element) {
+                                        const parentElement = element.closest('.arrbox3');
+
+                                        if (status === "성공") {
+                                            element.textContent = text;
+                                            parentElement.classList.remove('arrbox3');
+                                            parentElement.classList.add('arrbox1');
+                                            parentElement.classList.add('arrbox3');
+                                            parentElement.classList.remove('arrbox2');
+                                        } else if (status === "실패") {
+                                            element.textContent = "실패";
+                                            parentElement.classList.remove('arrbox3');
+                                            parentElement.classList.add('arrbox2');
+                                            parentElement.classList.add('arrbox3');
+                                            parentElement.classList.remove('arrbox1');
+                                        }
+
+                                    } else {
+                                        console.error("해당 선택자에 맞는 요소를 찾을 수 없습니다.");
+                                    }
+                                    // } else {
+                                    //     console.error("데이터를 찾을 수 없습니다.");
+                                    // }
+                                }
+                            }
+
+                            var result1=findDataByType(data1, model_result, "STT 및 화자분리");
+                            var result2=findDataByType(data2, model_result, "genderNage");
+                            var result4=findDataByType(data3, model_result, "VOC");
+                            var result5=findDataByType(data4, model_result, "emotion");
+                            // console.log("result1:",result1)
+                            // console.log("result2:",result2)
+                            // console.log("result4:",result4)
+                            // console.log("result5:",result5)
+
+                            var text1=result1[0];
+                            var text2=result2[2];
+                            var text4=result4[3];
+                            var text5=result5[4];
+
+                            var emotion_percent=result5[1];
+                            var emotion_text;
+
+                            if(text5===0){
+                                emotion_text="긍정";
+                            }else if (text5===1){
+                                emotion_text="부정";
+                            }else{
+                                emotion_text="중립";
+                            }
+                            console.log(emotion_text)
+
+                            processDataAndApplyToDOM(result1, '.arrange_box .arrbox3:nth-child(1) .arrbox_info h1',text1);
+                            processDataAndApplyToDOM(result2,'.arrange_box .arrbox3:nth-child(2) .arrbox_info h1',text2);
+                            processDataAndApplyToDOM(result5,'.arrange_box .arrbox3:nth-child(3) .arrbox_info h1',emotion_text);
+                            processDataAndApplyToDOM(result4, '.arrange_box .arrbox3:nth-child(4) .arrbox_info h1',text4);
+
+                            var acurrNumElement = document.querySelector("body > div.main > div > div.con_wrap.page2.block > div:nth-child(3) > div:nth-child(2) > div.model_box_wrap > div.arrange_box > div:nth-child(3) > div.arrbox_info > div > div > div.acurr_num");
+                            acurrNumElement.textContent = emotion_percent + '%';
+                            var targetElement=document.querySelector("body > div.main > div > div.con_wrap.page2.block > div:nth-child(3) > div:nth-child(2) > div.model_box_wrap > div.arrange_box > div:nth-child(3) > div.arrbox_info > div > div > div.acurr_bar > div");
+                            targetElement.style.width=emotion_percent+ '%';
+
+                            var genderacurrNumElement = document.querySelector("body > div.main > div > div.con_wrap.page2.block > div:nth-child(3) > div:nth-child(2) > div.model_box_wrap > div.arrange_box > div:nth-child(2) > div.arrbox_info > div > div > div.acurr_num");
+                            genderacurrNumElement.textContent = genderNage_valid_accuracy+ '%';
+                            var genderNageElement=document.querySelector("body > div.main > div > div.con_wrap.page2.block > div:nth-child(3) > div:nth-child(2) > div.model_box_wrap > div.arrange_box > div:nth-child(2) > div.arrbox_info > div > div > div.acurr_bar > div")
+                            genderNageElement.style.width=genderNage_valid_accuracy+ '%';
+
+                            var vocacurrNumElement = document.querySelector("body > div.main > div > div.con_wrap.page2.block > div:nth-child(3) > div:nth-child(2) > div.model_box_wrap > div.arrange_box > div.arrbox2.arrbox3 > div.arrbox_info > div > div > div.acurr_num")
+                            vocacurrNumElement.textContent = voc_valid_accuracy + '%';
+                            var vocElement=document.querySelector("body > div.main > div > div.con_wrap.page2.block > div:nth-child(3) > div:nth-child(2) > div.model_box_wrap > div.arrange_box > div.arrbox2.arrbox3 > div.arrbox_info > div > div > div.acurr_bar > div")
+                            vocElement.style.width=voc_valid_accuracy+ '%';
+
+                            // var sttElement=document.querySelector("body > div.main > div > div.con_wrap.page2.block > div:nth-child(3) > div:nth-child(2) > div.model_box_wrap > div.arrange_box > div:nth-child(1) > div.arrbox_info > div > div > div.acurr_num")
+                            // sttElement.textContent="완료";
+                            var sttchangeElemt=document.querySelector("body > div.main > div > div.con_wrap.page2.block > div:nth-child(3) > div:nth-child(2) > div.model_box_wrap > div.arrange_box > div:nth-child(1) > div.arrbox_info > div > div");
+                            sttchangeElemt.style.color="#aaa";
+                        },
+                        error: function(error) {
+                            console.error('실패');
+                        }
+
+                    })
+                }
+            });
+        });
+
+        // 이전 스크립트 블록에서 다음과 같은 로직 추가
+        $(document).ready(function () {
+
+            var mydata = [
+                { rank: "1", keyword: "감사", emotion: "긍정", amount: "301" },
+                { rank: "2", keyword: "감사", emotion: "긍정", amount: "301" },
+                { rank: "3", keyword: "감사", emotion: "긍정", amount: "301" },
+            ];
+        });
+    </script>
+
+    <script>
+        // 설정 팝업창 열기
+        $(function(){
+            $(".setting_btn").click(function(){
+                $(".popup").addClass("block");
+                $(".popup_bg").addClass("block");
+            });
+        });
+
+        // 설정 팝업창 닫기
+        $(function(){
+            $(".close_btn").click(function(){
+                $(".popup").addClass("none");
+                $(".popup_bg").addClass("none");
+                $(".popup").removeClass("block");
+                $(".popup_bg").removeClass("block");
+            });
+        });
+
+        // 설정 팝업창 닫기
+        $(function(){
+            $(".cancel_btn").click(function(){
+                $(".popup").addClass("none");
+                $(".popup_bg").addClass("none");
+                $(".popup").removeClass("block");
+                $(".popup_bg").removeClass("block");
+            });
+        });
+
+        $(function () {
+            $("#datepicker, #datepicker2").datepicker();
+        });
+
+        // 상담유형선택 ui
+        $(function () {
+            $('.type_tit').click(function () {
+                $('.type_check').toggle();
+            });
+        });
+
+        // STT 팝업창 닫기
+        $(function(){
+            $(".close_btn").click(function(){
+                $(".stt_popup").addClass("none");
+            });
+        });
+
+        var model_type = '';
+        var editedRows = {};
+        // ** 모델 생성 팝업창 관련
+        $(document).ready(function () {
+            $(".model_add_btn").click(function () {
+                var section = $(this).closest('[data-section]').data('section');
+                console.log("모델 생성 섹션: " + section);
+
+                if (section === "VOC" || section === "genderNage" || section === "emotion") {
+                    model_type = section;
+
+                    // 새 모델 생성 버튼을 클릭했을 때
+                    $(".popup2 .sett_wrap").first().hide(); // '모델상태' 섹션 숨김
+                    $(".popup2 .sett_wrap").eq(1).hide(); // '정확도' 섹션 숨김
+                    // 이름과 설명 필드 초기화
+                    document.getElementById('model_name').value = '';
+                    document.getElementById('model_description').value = '';
+
+                    $.ajax({
+                        url: '{% url "AI_AP_PLUS:model_creation_popup" %}',  // AJAX 요청 URL
+                        method: 'POST',
+                        data: { section: section },
+                        success: function (data) {
+                            console.log(data)
+
+                            var baseSelect = $('#base_select');
+                            var datasetSelect = $('#dataset_select');
+
+                            baseSelect.empty();
+                            baseSelect.append('<option value="">Base를 선택해주세요</option>');
+                            data.model.forEach(function (item) {
+                                baseSelect.append($('<option>', {
+                                    value: item.id,
+                                    text: item.parameter_name  // 여기서 some_field는 보여주고 싶은 필드명
+                                }));
+                            });
+
+                            datasetSelect.empty();
+                            datasetSelect.append('<option value="">데이터를 선택해주세요</option>');
+                            data.dataset.forEach(function (item) {
+                                datasetSelect.append($('<option>', {
+                                    value: item.id,
+                                    text: item.dataset_name
+                                }));
+                            });
+
+                            // 이전 그리드 비우기
+                            $("#list14").GridUnload();
+
+                            //initailize jqgrid
+                            $("#list14").jqGrid({
+                                datatype: "local", // 로컬 데이터 사용
+                                height: 250,
+                                cellEdit: true,
+                                cellsubmit: 'clientArray',
+                                colNames: ['파라미터명', '설명', '설정값'],
+                                colModel: [
+                                    { name: 'parameter_name', index: 'parameter_name', width: 100, sortable: true },
+                                    { name: 'description', index: 'description', width: 235, sortable: true },
+                                    { name: 'default_value', index: 'default_value', width: 100, sortable: true, editable: true }
+                                ],
+                                afterSaveCell: function(rowid, cellname, value) {
+                                    if (cellname === 'default_value') {
+                                        if (!editedRows[rowid]) {
+                                            editedRows[rowid] = {};
+                                        }
+                                        editedRows[rowid][cellname] = value;
+                                    }
+                                },
+                            });
+                            // load jqgrid data
+                            data.general.forEach(function (item) {
+                                // jqGrid에 데이터 추가
+                                $("#list14").jqGrid('addRowData', item.id, item);
+                            });
+                        }
+                    });
+
+                    $(".popup2").removeClass("none");
+                    $(".popup_bg").removeClass("none");
+                    $("#popup2").show();
+                }
+
+            });
+        });
+
+        // ** 모델 생성 팝업창 > 모델 생성 버튼(id: model_create_btn) 눌렀을 때
+        document.addEventListener('DOMContentLoaded', function() {
+            // 페이지가 완전히 로드된 후 실행
+            document.getElementById('model_create_btn').addEventListener('click', function() {
+                // 여기에 버튼 클릭 시 실행할 코드 작성
+                console.log("생성 버튼 클릭됨!!!")
+                //alert("모델 학습이 시작됩니다.");
+                $(".popup2").addClass("none");
+                $(".popup_bg").addClass("none");
+
+
+                console.log("model_type: " + model_type);
+
+                var model_name = document.getElementById('model_name').value;
+                var model_description = document.getElementById('model_description').value;
+
+                var baseSelect = document.getElementById('base_select');
+                var base_model = baseSelect.options[baseSelect.selectedIndex].text;
+                console.log("base_model: " + base_model);
+
+                var datasetSelect = document.getElementById('dataset_select');
+                var dataset_id = datasetSelect.options[datasetSelect.selectedIndex].value;
+                var dataset_name = datasetSelect.options[datasetSelect.selectedIndex].text;
+                console.log("dataset_name: " + dataset_name);
+
+                var train_data_ratio = document.getElementById('amount').value;
+                console.log("train_data_ratio: " + train_data_ratio);
+
+                var gridData = $("#list14").jqGrid('getRowData');
+                gridData.forEach(function(row){
+                    if (editedRows[row.id]) {
+                        row.default_value = editedRows[row.id].default_value;
+                    }
+                });
+                var modifiedGridData = gridData.map(function(item) {
+                    // description 필드를 제거
+                    var modifiedItem = Object.assign({}, item);
+                    delete modifiedItem.description;
+                    return modifiedItem;
+                });
+
+                var gridDataJson = JSON.stringify(modifiedGridData);
+                console.log("gridDataJson");
+                console.log(gridDataJson);
+
+                // AJAX 요청을 통해 서버에 데이터 전송
+                fetch('{% url "AI_AP_PLUS:model_create_btn" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'), // CSRF 토큰 추가
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model_type: model_type,
+                        model_name: model_name,
+                        model_description: model_description,
+                        base_model: base_model,
+                        dataset_id: dataset_id,
+                        dataset_name: dataset_name,
+                        train_data_ratio: train_data_ratio,
+                        parameters: gridDataJson
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data); // 서버 응답 처리
+                        if (data.status === 'success') {
+                            window.location.reload();
+                        }else if (data.status === 'error') {
+                            alert("올바른 값이 입력되지 않았습니다.")
+                        }
+                    });
+            });
+        });
+
+        // 팝업창 닫기
+        $(document).on('click', '.close_btn', function() {
+            $(".popup2").addClass("none");
+            $(".popup_bg").addClass("none");
+        });
+
+        // ** 모델 적용 및 모델 삭제 버튼 **
+        $(document).ready(function () {
+            // 모델 적용 버튼
+            $(".model_apply_btn").click(function () {
+                var section = $(this).closest('[data-section]').data('section');
+                console.log("모델 적용 섹션: " + section);
+                var gridSelector;
+                if (section === "VOC") {
+                    gridSelector = '#list11';
+                } else if (section === "emotion") {
+                    gridSelector = '#list12';
+                } else if (section === "genderNage") {
+                    gridSelector = '#list13';
+                }
+                var selectedModelId = getSelectedModelId(gridSelector);
+                console.log("selectedModelId: " + selectedModelId)
+
+                if(selectedModelId){
+                    // 모델 적용 요청 전송
+                    applyModel(selectedModelId, section);
+                }
+
+            });
+            // 모델 삭제 버튼
+            $(".model_delete_btn").click(function () {
+                var section = $(this).closest('[data-section]').data('section');
+                console.log("모델 삭제 섹션: " + section);
+                var gridSelector;
+                if (section === "VOC") {
+                    gridSelector = '#list11';
+                } else if (section === "emotion") {
+                    gridSelector = '#list12';
+                } else if (section === "genderNage") {
+                    gridSelector = '#list13';
+                }
+                var selectedModelId = getSelectedModelId(gridSelector);
+                console.log("selectedModelId : ",+ selectedModelId)
+                if(selectedModelId){
+                    //모델 삭제 요청 전송
+                    deleteModel(selectedModelId);
+                }
+
+            });
+
+        });
+
+        function getSelectedModelId(gridSelector) {
+            var selectedRows = $(gridSelector).jqGrid('getGridParam', 'selarrrow'); // 선택된 행의 ID 배열
+            if (selectedRows.length === 0) {
+                return null; // 선택된 행이 없는 경우
+            }
+
+            // 첫 번째 선택된 행의 데이터 가져오기
+            var rowData = $(gridSelector).jqGrid('getRowData', selectedRows[0]);
+            return rowData.model_id; // model_id 필드의 값 반환
+        }
+
+
+
+        function applyModel(modelId, section){
+            $.ajax({
+                url: '{% url "AI_AP_PLUS:apply_model" %}',
+                method: 'POST',
+                data: {
+                    modelId: modelId,
+                    section: section,
+                    action: 'apply'
+                },
+                success: function (response) {
+                    window.location.reload();
+                },
+                error: function(xhr, status, error) {
+                    console.log("Error: " + error);
+                    alert('올바른 모델이 선택되지 않았습니다.')
+                }
+            });
+        }
+
+        function deleteModel(modelId){
+            $.ajax({
+                url: '{% url "AI_AP_PLUS:delete_model" %}',
+                method: 'POST',
+                data: {
+                    modelId: modelId,
+                    action: 'delete'
+                },
+                success: function (response) {
+                    window.location.reload();
+                }
+            });
+        }
+
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // 이 쿠키가 요청한 이름과 일치하는지 확인
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+
+        $(function () {
+            $(".tab_btn2").click(function () {
+                $(".tab_btn2").addClass("on");
+                $(".tab_btn1").removeClass("on");
+                $(".page1").addClass("none");
+                $(".page1").removeClass("block");
+                $(".page2").addClass("block");
+                $(".page2").removeClass("none");
+            });
+            $(".tab_btn1").click(function () {
+                $(".tab_btn1").addClass("on");
+                $(".tab_btn2").removeClass("on");
+                $(".page1").addClass("block");
+                $(".page1").removeClass("none");
+                $(".page2").addClass("none");
+                $(".page2").removeClass("block");
+            });
+
+
+            $(".tab_btn4").click(function () {
+                $(".tab_btn4").addClass("on2");
+                $(".tab_btn3").removeClass("on2");
+                $(".page3").addClass("none");
+                $(".page3").removeClass("block");
+                $(".page4").addClass("block");
+                $(".page4").removeClass("none");
+            });
+            $(".tab_btn3").click(function () {
+                $(".tab_btn3").addClass("on2");
+                $(".tab_btn4").removeClass("on2");
+                $(".page3").addClass("block");
+                $(".page3").removeClass("none");
+                $(".page4").addClass("none");
+                $(".page4").removeClass("block");
+            });
+        });
+
+        // info box hover
+        $(function () {
+            $(".info_icon").hover(function () {
+                $(".info_box").toggleClass("block");
+            });
+        });
+
+        $(function () {
+            var initialValue = 60;
+            $("#amount").val(initialValue + '%');
+
+            $("#slider").slider({
+                orientation: "horizontal",
+                range: "min",
+                min: 0,
+                max: 100,
+                value: 60,
+                slide: function(event, ui) {
+                    if (ui.value > 80) {
+                        $(this).slider('value', 80);
+                        return false;
+                    } else if (ui.value < 20) {
+                        $(this).slider('value', 20);
+                        return false;
+                    }
+                    $("#amount").val(ui.value + '%');
+                },
+                change: function(event, ui) {
+                    if (ui.value > 80) {
+                        $(this).slider('value', 80);
+                    } else if (ui.value < 20) {
+                        $(this).slider('value', 20);
+                    }
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+
+<div class="popup none">
+    <div class="popup_box">
+        <div class="popup_tit">개인정보 설정 <span class="close_btn"><i class="fa-solid fa-xmark"></i></span></div>
+        <div class="popup_con">
+            <div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">이름</div>
+                    <div class="text_wrap"><div class="user_name">{{ request.user.last_name }}{{ request.user.first_name }}</div></div>
+                </div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">계정</div>
+                    <div class="text_wrap"><div class="user_name">{{ request.user.username }}</div></div>
+                </div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">소속</div>
+                    <div class="text_wrap"><div class="company_name">{{ request.user.department }}</div></div>
+                </div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">현재 비밀번호</div>
+                    <div class="text_wrap"><input class="essen" type="text" name="current_password" id="current_password"></div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="sett_wrap">
+                        <div class="detail_tit">
+                            <label for="new_password">새 비밀번호</label>
+                        </div>
+                        <div class="text_wrap"><input class="essen" type="text" name="new_password" id="new_password"></div>
+                    </div>
+
+                    <div class="sett_wrap">
+                        <div class="detail_tit">비밀번호 확인</div>
+                        <div class="text_wrap"><input class="essen" type="text" name="confirm_password" id="confirm_password"></div>
+                    </div>
+
+                    <div class="sett_wrap">
+                        <div class="pop_btn_wrap" style="margin-top:50px;">
+                            <button type="submit" class="ok_btn">변경</button>
+
+                            <button class="cancel_btn">취소</button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="popup2" id="popup2" style="display: none;">
+    <div class="popup_box">
+        <div class="popup_tit">모델 생성 및 학습 <span class="close_btn"><i class="fa-solid fa-xmark"></i></span></div>
+        <div class="popup_con" style="margin:0;">
+            <div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">모델상태</div>
+                    <div class="text_wrap"><input type="text" name="" id="" value="학습완료" disabled></div>
+                </div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">정확도</div>
+                    <div class="text_wrap"><input type="text" name="" id="" value="83%" disabled></div>
+                </div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">이름</div>
+                    <div class="text_wrap2" style="width:535px;"><input class="essen" type="text" name="model_name" id="model_name" style="color:#333 !important;"></div>
+                </div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">설명</div>
+                    <div class="text_wrap"><textarea name="model_description" id="model_description" cols="30" rows="10"></textarea></div>
+                </div>
+                <div style="width:90%; margin:0 auto;">
+                    <div class="sett_wrap" style="margin-bottom: 0;">
+                        <div class="tab_box">
+                            <div class="tab_btn3 on2">기초정보</div>
+                            <div class="tab_btn4">학습 파라미터 설정</div>
+                        </div>
+                    </div>
+                    <div class="sett_wrap page3" style="margin-top:0;">
+                        <div style="width:90%; margin:0 auto; margin-top:20px; margin-bottom:20px;">
+                            <div class="sett_wrap">
+                                <div class="detail_tit">Base</div>
+                                <div class="text_wrap">
+                                    <select class="essen" name="base_select" id="base_select">
+                                        <option value="">Base를 선택해주세요</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="sett_wrap">
+                                <div class="detail_tit">학습 데이터</div>
+                                <div class="text_wrap">
+                                    <select class="essen" name="dataset_select" id="dataset_select">
+                                        <option value="">데이터를 선택해주세요</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="sett_wrap">
+                                <div class="detail_tit">학습 데이터 비율</div>
+                                <div class="text_wrap" style="position:relative; height: 30px;">
+                                    <div class="slider_wrap">
+                                        <div class="amount">
+                                            <input type="text" id="amount" readonly
+                                                   style="padding:0; height: auto; float:left; border:0; color:#235ee8; font-weight:bold;">
+                                        </div>
+                                        <div id="slider"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="sett_wrap page4 none" style="margin-top:0;">
+                        <table id="list14"></table>
+                    </div>
+                </div>
+
+                <div class="sett_wrap">
+                    <div class="pop_btn_wrap" style="width: 100%;">
+                        <button class="model_add_btn" id="model_create_btn" style="float: right;">모델생성</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="aside">
+    <div class="aside_wrap">
+        <div class="logo"><img src="/resources/img/common/kt-is-logo-c.png" alt="logo"></div>
+        <div class="menu">
+            <ul>
+<!--                {% if user_groups == "user" %}-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/AI_AP_PLUS/">-->
+<!--                        <i class="ni ni-tv-2 text-primary"></i>-->
+<!--                        <span class="nav-link-text">대시보드</span>-->
+<!--                    </a>-->
+<!--                </li>-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/AI_AP_PLUS/data_analysis_result">-->
+<!--                        <i class="ni ni-tv-2 text-primary"></i>-->
+<!--                        <span class="nav-link-text">상담 추이</span>-->
+<!--                    </a>-->
+<!--                </li>-->
+<!--                {% elif user_groups == "manager"%}-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/AI_AP_PLUS/">-->
+<!--                        <i class="ni ni-tv-2 text-primary"></i>-->
+<!--                        <span class="nav-link-text">대시보드</span>-->
+<!--                    </a>-->
+<!--                </li>-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/AI_AP_PLUS/data_analysis_result">-->
+<!--                        <i class="ni ni-tv-2 text-primary"></i>-->
+<!--                        <span class="nav-link-text">상담 추이</span>-->
+<!--                    </a>-->
+<!--                </li>-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/AI_AP_PLUS/stt_result">-->
+<!--                        <i class="ni ni-tv-2 text-primary"></i>-->
+<!--                        <span class="nav-link-text">상담녹취 결과</span>-->
+<!--                    </a>-->
+<!--                </li>-->
+<!--                {% elif user_groups == "dev" %}-->
+                <li class="nav-item">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/dashboard}">
+                        <i class="ni ni-tv-2 text-primary"></i>
+                        <span class="nav-link-text">대시보드</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/data_analysis_result}">
+                        <i class="ni ni-tv-2 text-primary"></i>
+                        <span class="nav-link-text">상담 추이</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/stt_result}">
+                        <i class="ni ni-tv-2 text-primary"></i>
+                        <span class="nav-link-text">상담녹취 결과</span>
+                    </a>
+                </li>
+                <li class="on">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/job}">
+                        <i class="ni ni-tv-2 text-primary"></i>
+                        <span class="nav-link-text">업무 관리</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/system_setting}">
+                        <i class="ni ni-tv-2 text-primary"></i>
+                        <span class="nav-link-text">시스템 설정</span>
+                    </a>
+                </li>
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/management/batchtest">-->
+<!--                        <i class="ni ni-tv-2 text-primary"></i>-->
+<!--                        <span class="nav-link-text">단건 테스트</span>-->
+<!--                    </a>-->
+<!--                </li>-->
+<!--                {% endif %}-->
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="main">
+    <div class="content">
+        <div class="con_wrap">
+            <div class="account_box">
+                <div class="user_img">
+                    {% if user_groups == "user" %}
+                    <img src="/static/assets/img/common/admin_img.png" alt="">
+                    {% elif user_groups == "manager"%}
+                    <img src="/static/assets/img/common/developer_img.png" alt="">
+                    {% elif user_groups == "dev" %}
+                    <img src="/static/assets/img/common/manage_img.png" alt="">
+                    {% endif %}
+                </div>
+                <div class="user_box">
+                    <div class="user_name">{{ request.user.username }}님</div>
+                    <div class="access_time">{{request.user.last_login|date:"Y-m-d H:i:s"}}</div>
+                </div>
+                <div class="setting_box">
+                    <button class="setting_btn"><i class="fa-solid fa-gear"></i></button>
+                </div>
+                <div class="logout_box">
+                    <a  th:href="@{/user/logout}" class="logout_btn">
+                        <i class="ni ni-support-16"></i>
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="con_wrap" style="margin-bottom: 0;">
+            <div class="tab_box">
+                <div class="tab_btn1 on">모델관리</div>
+                <div class="tab_btn2">배치 통합 관리</div>
+            </div>
+        </div>
+
+        <div class="con_wrap page1" style="margin-top:0; margin-bottom:0;">
+            <!-- <div class="tab_tit"><span>모델 정보 확인</span></div> -->
+            <div class="filter_box" style="box-shadow: none;">
+                <div class="filter_tit" style="margin-left:30px;">
+                    <p>모델 정보 확인</p>
+                </div>
+                <div class="date_select" style="margin-left:10px; display:none">
+                    <input type="text" id="datepicker" placeholder="날짜 선택" readonly>
+                    <div>~</div>
+                    <input type="text" id="datepicker2" placeholder="날짜 선택" readonly>
+                </div>
+                <button class="search_btn" style="margin-left: 10px; display:none"><i class="fa-solid fa-magnifying-glass"></i> 조회</button>
+            </div>
+            <div class="con_wrap" style="margin-top: 0;">
+                <div class="model_box"  data-section="VOC">
+                    <div class="model_tit">
+                        <span>VOC 모델</span>
+                        <button class="model_add_btn"><i class="fa-solid fa-plus"></i> 새 모델생성</button>
+                    </div>
+                    <div class="model_box_wrap">
+                        <div class="model_graph">
+                            <!-- <img src="\static\assets\img\contents\graph1.png" alt=""> -->
+                            <canvas id="vocChart"></canvas>
+                        </div>
+                        <div class="model_date">
+                            <!-- <div>23-07-12</div>
+                            <div>23-07-12</div>
+                            <div>23-07-12</div> -->
+                        </div>
+                        <div class="model_info">
+                            <div class="model_info_tit">
+                                <div>현재 모델 정보</div>
+                            </div>
+                            <div class="model_info_text">
+                                <div id="VOCModelDate">2023-07-27</div>
+                                <div id="VOCModelName">KoBERT_V1</div>
+                                <div id="VOCModelAccuracy">92.5%</div>
+                            </div>
+                        </div>
+                        <div class="model_btn">
+                            <button class="model_apply_btn">모델 적용</button>
+                            <button class="model_delete_btn">모델 삭제</button>
+                        </div>
+                        <div class="model_table">
+                            <div class="voc_table">
+                                <table id="list11"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="model_box" data-section="emotion">
+                    <div class="model_tit">
+                        <span>긍부정 모델</span>
+                        <button class="model_add_btn"><i class="fa-solid fa-plus"></i> 새 모델생성</button>
+                    </div>
+                    <div class="model_box_wrap">
+                        <div class="model_graph"><canvas id="emotionChart"></canvas></div>
+                        <div class="model_date">
+                            <!-- <div>23-07-12</div>
+                            <div>23-07-12</div>
+                            <div>23-07-12</div> -->
+                        </div>
+                        <div class="model_info">
+                            <div class="model_info_tit">
+                                <div>현재 모델 정보</div>
+                            </div>
+                            <div class="model_info_text">
+                                <div id="emotionModelDate"> </div>
+                                <div id="emotionModelName"> </div>
+                                <div id="emotionModelAccuracy"> </div>
+                            </div>
+                        </div>
+                        <div class="model_btn">
+                            <button class="model_apply_btn">모델 적용</button>
+                            <button class="model_delete_btn">모델 삭제</button>
+                        </div>
+                        <div class="model_table">
+                            <div class="voc_table">
+                                <table id="list12"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="model_box" data-section="genderNage">
+                    <div class="model_tit">
+                        <span>성별 나이 측정 모델</span>
+                        <button class="model_add_btn" ><i class="fa-solid fa-plus"></i> 새 모델생성</button>
+                    </div>
+                    <div class="model_box_wrap">
+                        <div class="model_graph"><canvas id="genderNageChart"></canvas></div>
+                        <div class="model_date">
+                            <!-- <div>23-07-12</div>
+                            <div>23-07-12</div>
+                            <div>23-07-12</div> -->
+                        </div>
+                        <div class="model_info">
+                            <div class="model_info_tit">
+                                <div>현재 모델 정보</div>
+                            </div>
+                            <div class="model_info_text">
+                                <div id="genderNageModelDate"> </div>
+                                <div id="genderNageModelName"> </div>
+                                <div id="genderNageModelAccuracy"> </div>
+                            </div>
+                        </div>
+                        <div class="model_btn">
+                            <button class="model_apply_btn">모델 적용</button>
+                            <button class="model_delete_btn">모델 삭제</button>
+                        </div>
+                        <div class="model_table">
+                            <div class="voc_table">
+                                <table id="list13"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="con_wrap page2 none" style="margin-top: 0;">
+            <div class="filter_box" style="box-shadow: none; width:100%; overflow: hidden; margin-bottom:0;">
+                <div class="filter_tit" style="margin-left:30px;"><p>배치 통합 관리</p></div>
+                <!-- <div class="date_select" style="margin-left:10px;">
+                  <input type="text" id="datepicker" placeholder="날짜 선택" readonly>
+                  <div>~</div>
+                  <input type="text" id="datepicker2" placeholder="날짜 선택" readonly>
+                </div>
+                <button class="search_btn" style="margin-left: 10px;"><i class="fa-solid fa-magnifying-glass"></i> 조회</button> -->
+            </div>
+            <div class="con_wrap" style="margin-top:0; margin-bottom:0;">
+                <div class="manage_box" style="margin:0; margin-left:15px; width:320px;">
+                    <div class="manage01" style="width:48%;">
+                        <span>배치 성공률</span>
+                        <span>{{ success_percent }}%</span>
+                    </div>
+                    <div class="manage02" style="width:48%;">
+                        <span>배치 실패</span>
+                        <span>{{ fail_count }}건</span>
+                    </div>
+                </div>
+            </div>
+            <div class="con_wrap">
+                <div class="model_box_2">
+                    <div class="model_tit"><span>배치 현황</span>
+                        <!-- <button class="reloca_btn">재배치</button> -->
+                    </div>
+                    <div class="model_box_wrap">
+                        <div class="model_graph"><canvas id="bar_graph" ></canvas></div>
+                        <div class="model_table" style="margin-top:10px;">
+                            <table id="batch_list"></table>
+                            <!-- <div id="pager"></div> -->
+                        </div>
+                    </div>
+                </div>
+                <div class="model_box_2">
+                    <div class="model_tit">
+                        <span>배치 상세 내역</span>
+                        <!-- <div class="info_icon">
+                          <img src="/static/assets/img/contents/question_icon.png" alt="">
+                          <div class="info_box none">파란색은 성공 <br> 빨간색은 실패입니다</div>
+                        </div> -->
+                    </div>
+                    <div class="model_box_wrap">
+                        <div class="arrange_id">
+                            <div>배치 ID</div>
+                            <div><input type="text" name="" id="" value="" disabled></div>
+                        </div>
+                        <div class="arrange_box">
+                            <div class="arrbox3">
+                                <div class="arrbox_tit">STT</div>
+                                <div class="arrbox_info">
+                                    <h1>-</h1>
+                                    <div class="acurracy_box">
+                                        <div class="acurr_wrap">
+                                            <p style="color:#eee;">STT 완료</p>
+                                            <div class="acurr_bar">
+                                                <div class="acurr_color"></div>
+                                            </div>
+                                            <div class="acurr_num"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="arrbox3">
+                                <div class="arrbox_tit">성별 & 나이</div>
+                                <div class="arrbox_info">
+                                    <h1>-</h1>
+                                    <div class="acurracy_box">
+                                        <div class="acurr_wrap">
+                                            <p>정확도</p>
+                                            <div class="acurr_bar">
+                                                <div class="acurr_color"></div>
+                                            </div>
+                                            <div class="acurr_num"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="arrbox3">
+                                <div class="arrbox_tit">긍부정</div>
+                                <div class="arrbox_info">
+                                    <h1>-</h1>
+                                    <div class="acurracy_box">
+                                        <div class="acurr_wrap">
+                                            <p>정확도</p>
+                                            <div class="acurr_bar">
+                                                <div class="acurr_color"></div>
+                                            </div>
+                                            <div class="acurr_num"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="arrbox3">
+                                <div class="arrbox_tit">VOC</div>
+                                <div class="arrbox_info">
+                                    <h1>-</h1>
+                                    <div class="acurracy_box">
+                                        <div class="acurr_wrap">
+                                            <p>정확도</p>
+                                            <div class="acurr_bar">
+                                                <div class="acurr_color"></div>
+                                            </div>
+                                            <div class="acurr_num"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>
+<script>
+
+    const ctx = document.getElementById('bar_graph');
+
+    var fail_percent = {{ fail_percent }}
+    var success_percent = {{ success_percent }}
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['성공', '실패'],
+            datasets: [{
+                data: [success_percent, fail_percent],
+                backgroundColor: [ 'rgba(2,155,212,1)',   'rgba(224, 227, 232, 1)'],
+
+            }]
+        },
+        options: {
+            maxBarThickness: 35,
+            plugins :{
+                legend :{
+                    display:false
+                },
+
+            },
+
+        },
+
+    });
+
+
+</script>

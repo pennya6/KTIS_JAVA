@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>STT 결과</title>
+    <link rel="stylesheet" href="/resources/css/style.css">
+    <!--    font awesome-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!--    google font-->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!--  jqGrid-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.10.2.min.js" /></script>
+    <script type="text/javascript" src="https://code.jquery.com/ui/1.10.3/jquery-ui.min.js" /></script>
+    <link rel="stylesheet" type="text/css" href="/resources/js/jqgrid/css/ui.jqgrid.css" />
+    <script src="/resources/js/jqgrid/js/i18n/grid.locale-kr.js" type="text/javascript"></script>
+    <script src="/resources/js/jqgrid/js/minified/jquery.jqGrid.min.js" type="text/javascript"></script>
+    <!-- tree ui -->
+    <link rel="stylesheet" href="/resources/js/jstree/dist/themes/default/style.min.css" />
+    <script src="/resources/js/jstree/dist/jstree.min.js"></script>
+    <!--    datepicker-->
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <style>
+        .step-b{
+            position: relative;
+            z-index: 9999;
+            top: 100px;
+            width: 190px;
+            line-height: 40px;
+            border: 1px solid #235ee8;
+            border-radius: 7px;
+            box-sizing: border-box;
+            overflow: hidden;
+            color: #235ee8;
+            background: #fff;
+            font-size: 14px;
+        }
+    </style>
+    <!-- main wavesurfer.js lib -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/1.2.3/wavesurfer.min.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+
+            var data = [
+                {% for item in items %}
+            {
+                "result_id": "{{ item.result_id }}",
+                "record_id": "{{item.record_id}}",
+                "gender": "{{ item.gender }}",
+                "age": "{{ item.age }}",
+                "emotion": "{{ item.emotion }}",
+                "category": "{{ item.category_1 }}-{{ item.category_2 }}-{{ item.category_3 }}",
+                "time":"{{item.reqre_time}}",
+                "talk_date": "{{ item.talk_date|date:"Y-m-d" }}",
+            },
+            {% endfor %}
+        ];
+
+
+            $("#list").jqGrid({
+
+                datatype: 'local',
+                data:data,
+                colNames: ['id', '성별', '나이', '긍부정', '상담유형', '상담시간','상담날짜','STT'],
+                colModel: [
+                    { name: 'result_id', width: 50, align: 'center' },
+                    { name: 'gender', width: 100, align: 'center', formatter:function(cellvalue, options, rowObject){return cellvalue == 0? '여':'남';} },
+                    { name: 'age', width: 100, align: 'center' },
+                    { name: 'emotion', width: 80, align: 'center',
+                        formatter:function(cellvalue, options, rowObject){
+                            if (cellvalue == 0){ return '긍정';}
+                            else if(cellvalue == 1) {return '부정';}
+                            else if(cellvalue == 2) {return '중립';}
+                        }
+                    },
+                    { name: 'category', width: 100, align: 'center' }, // 적절한 너비 설정
+                    { name: 'time',width:100,align:'center'},
+                    { name: 'talk_date', width: 120, align: 'center' }, // 적절한 너비 설정
+                    { name: 'stt', align: 'center',
+                        formatter: function (cellvalue, options, rowObject) {
+                            return '<button class="btn">' +
+                                '<img src="/static/assets/img/icons/common/info.png" alt="Snow" width="25" height="25" ' +
+                                'class="popup-button" ' +
+                                'data-result_id="' + rowObject.result_id + '" ' +
+                                'data-record_id="' + rowObject.record_id + '" ' +
+                                'data-gender="' + rowObject.gender + '" ' +
+                                'data-age="' + rowObject.age + '" ' +
+                                'data-emotion="' + rowObject.emotion + '" ' +
+                                'data-category="' + rowObject.category + '" ' +
+                                'data-time="' + rowObject.time + '" ' +
+                                'data-talk_date="' + rowObject.talk_date + '" ' +
+                                'title="자세한 정보 보기">';
+                        }
+                    },
+                ],
+                autowidth: true,
+                rownumbers : false,
+                multiselect: false,
+                pager:'#pager',
+                rowNum: 19,
+                sortname: 'id',
+                sortorder: 'asc',
+                height: 650,
+
+            });
+
+            $(window).on('resize.jqGrid', function() {
+                $("#list").jqGrid('setGridWidth', $("#list").parent().parent().parent().parent().parent().width());
+            })
+            $(".jarviswidget-fullscreen-btn").click(function(){
+                setTimeout(function() {
+                    $("#list").jqGrid('setGridWidth', $("#list").parent().parent().parent().parent().parent().width());
+                }, 100);
+            });
+
+            $(function(){
+                $("#start_date, #end_date").datepicker({
+                    dateFormat:"yy-mm-dd"
+                });
+
+                function getCookie(name) {
+                    var cookieValue = null;
+                    if (document.cookie && document.cookie !== '') {
+                        var cookies = document.cookie.split(';');
+                        for (var i = 0; i < cookies.length; i++) {
+                            var cookie = jQuery.trim(cookies[i]);
+                            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                break;
+                            }
+                        }
+                    }
+                    return cookieValue;
+                }
+
+                // 이미지 버튼을 클릭하면 팝업 열기 이벤트를 등록
+                $(document).on('click', '.popup-button', function(){
+                    //var rowId = $(this).data('row-id'); // 버튼에 저장된 행의 ID 가져오기
+                    var emotion = $(this).data('emotion');
+                    var gender = $(this).data('gender');
+                    var category = $(this).data('category');
+                    var age = $(this).data('age');
+                    var time = $(this).data('time');
+                    var talk_date = $(this).data('talk_date');
+                    var record_id = $(this).data('record_id');
+                    var result_id= $(this).data('result_id');
+
+                    var categories = category.split("-"); //"대학병원-진료안내-검사"
+                    var largeCategory = categories[1]; // "진료안내"
+                    var smallCategory = categories[2]; // "검사"
+
+                    console.log("gender:", gender)
+                    console.log("category:", category)
+                    console.log("age:", age)
+                    console.log("emotion:", emotion)
+                    console.log("time:", time)
+                    console.log("talk_date:", talk_date)
+                    console.log("record_id:", record_id)
+                    console.log("result_id:", result_id)
+
+                    var genderImg = gender===1 ? "/static/assets/img/contents/man_profile.png" : "/static/assets/img/contents/woman_profile.png" ;
+                    document.getElementById("profileImage").src = genderImg;
+
+                    setemotionRadioButton(emotion);
+                    setgenderRadioButton(gender);
+                    setAgeRadioButton(age);
+
+                    document.getElementById("large_category").value = largeCategory;
+                    document.getElementById("small_category").value = smallCategory;
+                    document.getElementById("record_id").value = record_id;
+                    document.getElementById("reqre_time").value = time;
+                    document.getElementById("talk_date").value = talk_date;
+
+                    // 팝업 열 때마다 대화창을 비웁니다.
+                    document.querySelector('.stt_chat').innerHTML = '';
+                    searchFromDatabase(result_id);
+
+                    $("#stt_popup").show();
+
+                });
+
+                $(document).on('click', '.close_btn', function(){
+                    $("#stt_popup").hide();
+                });
+                //});
+
+                var emotionMap = {
+                    0 : "happy",
+                    1 : "bad"
+                }
+
+                function setemotionRadioButton(emotion){
+                    var radioButtons = document.getElementsByName("contact1");
+                    for (var i = 0; i < radioButtons.length; i++) {
+                        if (radioButtons[i].value === emotionMap[emotion]) {
+                            radioButtons[i].checked = true;
+                        } else {
+                            radioButtons[i].disabled = true;
+                        }
+                    }
+                }
+
+                function setgenderRadioButton(gender) {
+                    if (gender === 1) {
+                        $("#man").prop("checked", true);
+                        $("#woman").prop("checked", false);
+                    } else  {
+                        $("#man").prop("checked", false);
+                        $("#woman").prop("checked", true);
+                    }
+                }
+
+                function setAgeRadioButton(age) {
+                    var radioButtons = document.getElementsByName("contact3");
+                    for (var i = 0; i < radioButtons.length; i++) {
+                        if (radioButtons[i].value === age) {
+                            radioButtons[i].checked = true;
+                        } else {
+                            radioButtons[i].disabled = true;
+                        }
+                    }
+                }
+
+                $(function(){
+                    $("#datepicker, #datepicker2").datepicker();
+                });
+
+                $(document).on('click', '.close_btn', function(){
+                    $("#stt_popup").hide();
+                });
+            });
+
+            $("#submit_button").on("click", function () {
+                let start_date = $("#start_date").val() ? $("#start_date").val() : "";
+                let end_date = $("#end_date").val() ? $("#end_date").val() : "";
+                var emotion = $("#emotion").val();
+                var gender = $("#gender").val();
+                let category1 = select_type_1 ? select_type_1 : "";
+                let category2 = select_type_2 ? select_type_2 : "";
+
+                location.href=`?start_date=${start_date}&end_date=${end_date}&gender=${gender}&emotion=${emotion}&category1=${category1}&category2=${category2}`
+
+            })
+        });
+
+        function searchFromDatabase(id) {
+            // Ajax를 사용하여 서버로 데이터를 전송합니다.
+            var csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "{% url 'AI_AP_PLUS:detail_stt' %}", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.setRequestHeader("X-CSRFToken", csrfToken);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // 서버로부터 받은 응답을 처리하는 코드를 작성합니다.
+                    var response = JSON.parse(xhr.responseText);
+                    console.log(response)
+
+                    displayChatMessages(response);
+                    loadWav(response);
+                }
+            };
+            // 검색에 사용할 데이터를 전송합니다.
+            xhr.send("search_query=" + encodeURIComponent(id));
+        }
+
+        function displayChatMessages(response) {
+            var chatContainer = stt_popup.querySelector('.stt_chat');
+            response.stt_message.forEach(function(message) {
+                var isSender = message.speaker_type === "0";
+                var chatBubble = createChatBubble(message, isSender);
+                chatContainer.appendChild(chatBubble);
+            });
+        }
+
+        function loadWav(response) {
+            let record_id = response.record_id;
+            if(record_id!=""){
+                wavesurfer.load("/AI_AP_PLUS/downloads_wav?record_id=" + record_id);
+            }
+        }
+
+        function createChatBubble(message, isSender) {
+            var chatBubble = document.createElement('div');
+            chatBubble.className = isSender ? 'send' : 'receive';
+
+            var bubbleContent = document.createElement('div');
+            bubbleContent.className = 'bubble';
+            bubbleContent.textContent = message.stt_text;
+
+            var sendTime = document.createElement('div');
+            sendTime.className = 'send_time';
+            sendTime.textContent = message.start_time;
+
+            chatBubble.appendChild(bubbleContent);
+            chatBubble.appendChild(sendTime);
+
+            return chatBubble;
+        }
+
+        // 설정 팝업창 열기
+        $(function(){
+            $(".setting_btn").click(function(){
+                $(".popup").addClass("block");
+                $(".popup_bg").addClass("block");
+            });
+        });
+
+        // 설정 팝업창 닫기
+        $(function(){
+            $(".close_btn").click(function(){
+                $(".popup").addClass("none");
+                $(".popup_bg").addClass("none");
+                $(".popup").removeClass("block");
+                $(".popup_bg").removeClass("block");
+            });
+        });
+
+        // 설정 팝업창 닫기
+        $(function(){
+            $(".cancel_btn").click(function(){
+                $(".popup").addClass("none");
+                $(".popup_bg").addClass("none");
+                $(".popup").removeClass("block");
+                $(".popup_bg").removeClass("block");
+            });
+        });
+
+    </script>
+</head>
+
+<body>
+
+<div class="stt_popup" id="stt_popup" style="display: none;">
+    {% csrf_token %}
+    <div class="popup_box">
+        <div class="half">
+            <div class="popup_tit">상담상세정보</div>
+            <div class="popup_con" id="popup_con" style="border-right:1px solid #eee; box-sizing:border-box;">
+                <div class="detail_profile">
+                    <div class="pro_box">
+                        <img id="profileImage" src="/static/assets/img/contents/man_profile.png" alt="">
+                    </div>
+                </div>
+                <div class="detail_emotion">
+                    <div class="detail_tit">긍정</div>
+                    <div class="detail_con">
+                        <div class="radio_wrap">
+                            <input type="radio" id="happy" name="contact1" value="happy" />
+                            <label for="happy">긍정</label>
+                            <input type="radio" id="good" name="contact1" value="good" />
+                            <label for="good">중립</label>
+                            <input type="radio" id="bad" name="contact1" value="bad" />
+                            <label for="bad">부정</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail_sex">
+                    <div class="detail_tit">성별</div>
+                    <div class="detail_con">
+                        <div class="radio_wrap">
+                            <input type="radio" id="man" name="contact2" value="man" disabled/>
+                            <label for="man">남자</label>
+                            <input type="radio" id="woman" name="contact2" value="woman" disabled/>
+                            <label for="woman">여자</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail_age">
+                    <div class="detail_tit">나이</div>
+                    <div class="detail_con">
+                        <div class="radio_wrap">
+                            <input type="radio" id="20대" name="contact3" value="20대" />
+                            <label for="20대">20대</label>
+                            <input type="radio" id="30대" name="contact3" value="30대" />
+                            <label for="30대">30대</label>
+                            <input type="radio" id="40대" name="contact3" value="40대" />
+                            <label for="40대">40대</label>
+                            <input type="radio" id="50대" name="contact3" value="50대" />
+                            <label for="50대">50대</label>
+                            <input type="radio" id="60대" name="contact3" value="60대" />
+                            <label for="60대">60대</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail_type">
+                    <div class="detail_tit">유형</div>
+                    <div class="detail_con">
+                        <div class="text_wrap">
+                            <input type="text" name="" id="large_category" value="진료안내" disabled>
+                            <input type="text" name="" id="small_category" value="외래" disabled>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail_voice">
+                    <div class="detail_tit">녹취파일명</div>
+                    <div class="detail_con">
+                        <div class="text_wrap">
+                            <input type="text" name="" id="record_id" value="HOS0009680.wav" disabled>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail_time">
+                    <div class="detail_tit">상담 시간</div>
+                    <div class="detail_con">
+                        <div class="text_wrap">
+                            <input type="text" name="" id="reqre_time" value="30초" disabled>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail_date">
+                    <div class="detail_tit">상담날짜</div>
+                    <div class="detail_con">
+                        <div class="text_wrap">
+                            <input type="text" name="" id="talk_date" value="2023-11-22" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="half">
+            <div class="popup_tit">상담녹취록 STT 결과<span class="close_btn"><i class="fa-solid fa-xmark"></i></span></div>
+            <div class="popup_con" style="margin-top:0px;">
+                <div>
+                    <div class="stt_chat" style="height:500px; overflow-y: auto;">
+                        {% comment %} <div class="user_name">고객</div>
+                        <div class="send">
+                            <div class="bubble">안녕하세요</div>
+                            <div class="send_time">9:00 AM</div>
+                        </div>
+                        <div class="receive">
+                            <div class="bubble">네, 안녕하세요</div>
+                            <div class="send_time">9:00 AM</div>
+                        </div>
+                        <div class="send">
+                            <div class="bubble">OOO선생님 외래 예약하려면
+                                언제로 잡아야할까요?</div>
+                            <div class="send_time">9:00 AM</div>
+                        </div>
+                        <div class="receive">
+                            <div class="bubble">14일 금요일 가능합니다.</div>
+                            <div class="send_time">9:00 AM</div>
+                        </div>
+                        <div class="send">
+                            <div class="bubble">네 알겠습니다.</div>
+                            <div class="send_time">9:00 AM</div>
+                        </div> {% endcomment %}
+                    </div>
+                    <div class="wave_con">
+                        <div class="wave_wrap">
+                            <div id="waveform"></div>
+                            <script>
+                                const ctx = document.createElement('canvas').getContext('2d')
+                                const gradient = ctx.createLinearGradient(0, 0, 0, 150)
+                                const gradient2 = ctx.createLinearGradient(0, 0, 0, 150)
+                                gradient.addColorStop(0, 'rgb(104, 224, 207)')
+                                gradient.addColorStop(1, 'rgb(32, 156, 255)')
+                                gradient2.addColorStop(0, 'rgb(0, 192, 250)')
+                                gradient2.addColorStop(1, 'rgb(1, 94, 234)')
+                                const options = {
+                                    container: '#waveform',
+                                    waveColor: gradient,
+                                    progressColor: gradient2,
+                                    width:300,
+                                    height: 50,
+                                    barWidth: 4,
+                                    barGap: 2,
+                                    barRadius: 2,
+                                    mediaControls : true,
+                                }
+                                const wavesurfer = WaveSurfer.create(options)
+                                wavesurfer.on('ready', wavesurfer.play.bind(wavesurfer));
+
+                                $(document).on('click', '.send, .receive', function(){
+                                    // 클릭한 버블에서 식별자 가져오기
+                                    const identifier = $(this).data('identifier');
+
+                                    // 클릭한 버블의 시간을 가져오기
+                                    const clickedTime = $(this).find('.send_time').text();
+                                    console.log(clickedTime);
+
+                                    // 시간을 파싱하여 초로 변환
+                                    const timeParts = clickedTime.split(':');
+                                    const hours = parseInt(timeParts[0], 10) || 0; // 두 자리가 아닐 경우 0으로 가정
+                                    const minutes = parseInt(timeParts[1], 10) || 0; // 두 자리가 아닐 경우 0으로 가정
+                                    const seconds = parseInt(timeParts[2], 10) || 0; // 두 자리가 아닐 경우 0으로 가정
+                                    const totalTimeInSeconds = hours * 3600 + minutes * 60 + seconds;
+
+                                    // WaveSurfer 설정 및 재생
+                                    wavesurfer.seekTo(totalTimeInSeconds / wavesurfer.getDuration());
+                                    wavesurfer.play();
+                                });
+                                // function scrollChatToBottom() {
+                                //       var chatDiv = $('.stt_chat');
+                                //       chatDiv.animate({ scrollTop: chatDiv.prop('scrollHeight') }, 5000); // 1000은 1초를 의미
+                                //   }
+
+                                //   var scrollInterval = setInterval(function() {
+                                //       scrollChatToBottom();
+                                //   }, 5000); // 5000은 5초를 의미, 필요에 따라 조절 가능
+
+                                //   setTimeout(function() {
+                                //       clearInterval(scrollInterval);
+                                //  }, 30000); // 30000은 30초를 의미, 필요에 따라 조절 가능
+
+                                $(document).on('click', '.close_btn', function(){
+                                    // WaveSurfer 일시 정지 및 재생 중지
+                                    if (wavesurfer.isPlaying()) {
+                                        wavesurfer.pause();
+                                        wavesurfer.stop();
+                                    }
+                                });
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="aside">
+    <div class="aside_wrap">
+        <div class="logo"><img src="/resources/img/common/kt-is-logo-c.png" alt="logo"></div>
+        <div class="menu">
+            <ul>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/dashboard}">
+                        <i class="ni ni-tv-2 text-primary"></i>
+                        <span class="nav-link-text">대시보드</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/data_analysis_result}">
+                        <i class="ni ni-tv-2 text-primary"></i>
+                        <span class="nav-link-text">상담 추이</span>
+                    </a>
+                </li>
+                <li class="on">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/stt_result}">
+                        <i class="ni ni-tv-2 text-primary"></i>
+                        <span class="nav-link-text">상담녹취 결과</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/job}">
+                        <i class="ni ni-tv-2 text-primary"></i>
+                        <span class="nav-link-text">업무 관리</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/system_setting}">
+                        <i class="ni ni-tv-2 text-primary"></i>
+                        <span class="nav-link-text">시스템 설정</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="popup none">
+    <div class="popup_box">
+        <div class="popup_tit">개인정보 설정 <span class="close_btn"><i class="fa-solid fa-xmark"></i></span></div>
+        <div class="popup_con">
+            <div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">이름</div>
+                    <div class="text_wrap"><div class="user_name">{{ request.user.last_name }}{{ request.user.first_name }}</div></div>
+                </div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">계정</div>
+                    <div class="text_wrap"><div class="user_name">{{ request.user.username }}</div></div>
+                </div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">소속</div>
+                    <div class="text_wrap"><div class="company_name">{{ request.user.department }}</div></div>
+                </div>
+                <div class="sett_wrap">
+                    <div class="detail_tit">현재 비밀번호</div>
+                    <div class="text_wrap"><input class="essen" type="text" name="current_password" id="current_password"></div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="sett_wrap">
+                        <div class="detail_tit">
+                            <label for="new_password">새 비밀번호</label>
+                        </div>
+                        <div class="text_wrap"><input class="essen" type="text" name="new_password" id="new_password"></div>
+                    </div>
+
+                    <div class="sett_wrap">
+                        <div class="detail_tit">비밀번호 확인</div>
+                        <div class="text_wrap"><input class="essen" type="text" name="confirm_password" id="confirm_password"></div>
+                    </div>
+
+                    <div class="sett_wrap">
+                        <div class="pop_btn_wrap" style="margin-top:50px;">
+                            <button type="submit" class="ok_btn">변경</button>
+
+                            <button class="cancel_btn">취소</button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="main">
+    <div class="content">
+        <div class="con_wrap" style="margin-bottom: 0px;">
+            <div class="account_box">
+                <div class="user_img">
+                    {% if user_groups == "user" %}
+                    <img src="/static/assets/img/common/admin_img.png" alt="">
+                    {% elif user_groups == "manager"%}
+                    <img src="/static/assets/img/common/developer_img.png" alt="">
+                    {% elif user_groups == "dev" %}
+                    <img src="/static/assets/img/common/manage_img.png" alt="">
+                    {% endif %}
+                </div>
+                <div class="user_box">
+                    <div class="user_name">{{ request.user.username }}님</div>
+                    <div class="access_time">{{request.user.last_login|date:"Y-m-d H:i:s"}}</div>
+                </div>
+                <div class="setting_box">
+                    <button class="setting_btn"><i class="fa-solid fa-gear"></i></button>
+                </div>
+                <div class="logout_box">
+                    <a  th:href="@{/user/logout}" class="logout_btn">
+                        <i class="ni ni-support-16"></i>
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="con_wrap" style="overflow: visible; margin-top:0; margin-bottom:0;">
+            <div class="filter_box">
+                <div class="filter_tit"><p>STT 결과 검색조회</p></div>
+                <div class="date_select" style="margin-left:10px;">
+                    <input type="text" name="start_date"id="start_date" value="{{start_date}}" placeholder="날짜 선택" readonly>
+                    <div>~</div>
+                    <input type="text" name="end_date"id="end_date" value="{{end_date}}" placeholder="날짜 선택" readonly>
+                </div>
+                <div class="sex_select">
+                    <span>성별선택</span>
+                    <select name="gender" id="gender">
+                        <option value=""></option>
+                        <option value="1" {% if gender == "1" %}selected{% endif %}>남</option>
+                        <option value="0" {% if gender == "0" %}selected{% endif %}>여</option>
+                    </select>
+                </div>
+                <div class="emotion_select">
+                    <span>긍부정</span>
+                    <select name="emotion" id="emotion">
+                        <option value=""></option>
+                        <option value="0" {% if emotion == "0" %}selected{% endif %}>긍정</option>
+                        <option value="1" {% if emotion == "1" %}selected{% endif %}>부정</option>
+                        <option value="2" {% if emotion == "2" %}selected{% endif %}>중립</option>
+                    </select>
+                </div>
+
+                <div class="type_select">
+                    <div class="type_tit">상담유형선택</div>
+                    <div class="type_check">
+                        <div class="step1 step-a">
+                            <ul>
+                                {% for cnslttype in cnslttype_items %}
+                                {% if cnslttype.level == 0 %}
+                                <li>
+                                    <input type="checkbox" id="cnslttype_{{cnslttype.type_id}}" data-level="{{cnslttype.level}}" name="category1" value="{{cnslttype.type_nm}}" onclick="stepCheckboxClickEvent('.step1', this, 'top');"><label for="cnslttype_{{cnslttype.type_id}}" class="cb1"><span>{{cnslttype.type_nm}}</span></label>
+                                </li>
+                                {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="type_check-2">
+                        {% for cnslttype_group in cnslttype_group_items %}
+                        <div class="step{{cnslttype_group.type_id}}-1 step-b" style= "display: none;">
+                            <ul>
+                                {% for cnslttype in cnslttype_items %}
+                                {% if cnslttype.parent_type_id == cnslttype_group.type_id %}
+                                <li>
+                                    <input type="checkbox" id="cnslttype_{{cnslttype.type_id}}" data-level="{{cnslttype.level}}" parent-id="{{cnslttype.parent_type_id}}" name="category2" value="{{cnslttype.type_nm}}" onclick="stepCheckboxClickEvent('.step{{cnslttype_group.type_id}}-1', this);"><label for="cnslttype_{{cnslttype.type_id}}" class="cb1"><span>{{cnslttype.type_nm}}</span></label>
+                                </li>
+                                {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="line"></div>
+                <button id="submit_button" class="search_btn"><i class="fa-solid fa-magnifying-glass"></i> 조회</button>
+            </div>
+        </div>
+        <div class="con_wrap stt_table" style="margin-top: 0;">
+            <div class="con_box">
+                <div class="box_1" style="height: auto; margin-top:10px;">
+                    <div class="box_wrap" style="width:98%; margin:0 auto; margin-top:20px;">
+                        <table id="list" style="display:block; width:100%;"></table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+    let select_type_1 = "{{category1}}" ? "{{category1}}" : "";
+    let select_type_2 = "{{category2}}" ? "{{category2}}" : "";
+
+    function stepCheckboxClickEvent (checkboxClassName, element, level) {
+
+        let stepCheckbox = $(checkboxClassName + " input:checked[type='checkbox']");
+        let count = (stepCheckbox) ? stepCheckbox.length : 0;
+
+        if(count > 1){
+            stepCheckbox.prop("checked",false);
+            $(element).prop("checked",true);
+        }
+
+        if(level && "top" === level) {
+            let stepBCheckbox = $(".step-b input:checked[type='checkbox']");
+            stepBCheckbox.prop("checked", false);
+        }
+    };
+
+    $(document).ready(function() {
+        // 상담유형선택 ui
+        $('.type_tit').click(function() {
+            let cnslt_dept_1 = $('.type_check');
+            let cnslt_dept_2 = $('.type_check-2');
+
+            cnslt_dept_1.toggle();
+            cnslt_dept_2.css('display', 'none');
+
+            // 조회 시 선택된 값 세팅
+            if(select_type_1 && select_type_1 !=""){
+                $('.step-a > ul > li').each(function(index, el){
+                    if($(el).find('input[type="checkbox"]').val() == select_type_1){
+                        let id = $(el).find('input[type="checkbox"]').attr('id').replace("cnslttype_", "");
+                        $(el).find('input[type="checkbox"]').prop("checked", true);
+                        $(`.step${id}-1`).show();
+                    }
+                })
+
+                if(cnslt_dept_1.css("display") != "none"){
+                    cnslt_dept_2.css('display', '');
+                    $('.step-b > ul > li').each(function(index, el_sub){
+                        if($(el_sub).find('input[type="checkbox"]').val() == select_type_2){
+                            $(el_sub).find('input[type="checkbox"]').prop("checked", true);
+                        }
+                    })
+                }
+            }
+        });
+
+
+        // 상담유형 Depth 1 선택 시 이벤트
+        $('.step-a ul li').off('click').on('click',function() {
+            // 체크가 해제되도록 설정
+            let curr_val = $(this).find('input[type="checkbox"]').val();
+            let id = $(this).find('input[type="checkbox"]').attr('id').replace("cnslttype_", "");
+            let cnslt_dept_1 = $('.type_check');
+            let cnslt_dept_2 = $('.type_check-2');
+            let cnslt_dept_2_sub = $('.step-b');
+
+            $('.step-a ul li').each(function(index, el){
+                if($(el).find('input[type="checkbox"]').val() == curr_val){
+                    $(el).prop('checked', true);
+                }
+                else{
+                    $(el).prop('checked', false);
+                }
+            });
+
+            select_type_1 = "";
+            if($(this).find('input[type="checkbox"]').is(':checked')){
+                select_type_1 = $(this).find('input[type="checkbox"]').val();
+            }
+
+            cnslt_dept_2.css("display", "none");
+            cnslt_dept_2_sub.css("display", "none");
+            if(select_type_1 != ""){
+                cnslt_dept_2.css("display", "");
+                $(`.step${id}-1`).show();
+            }
+            else{
+                select_type_2 = "";
+                cnslt_dept_2.css("display", "none");
+            }
+
+        });
+
+        // 상담유형 Depth 2 선택 시 이벤트
+        $('.step-b ul li').off('click').on('click',function() {
+            // 체크가 해제되도록 설정
+            let curr_val = $(this).find('input[type="checkbox"]').val();
+            if($(this).find('input[type="checkbox"]').is(":checked")){
+                select_type_2 = curr_val;
+            }else{
+                select_type_2 = "";
+            }
+        });
+    })
+
+</script>
