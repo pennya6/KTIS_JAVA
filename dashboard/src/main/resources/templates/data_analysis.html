@@ -211,7 +211,7 @@
                     {% endif %}
                 </div>
                 <div class="user_box">
-                    <div class="user_name">{{ request.user.username }}님</div>
+                    <div th:text="${username}">님</div>
                     <div class="access_time">{{request.user.last_login|date:"Y-m-d H:i:s"}}</div>
                 </div>
                 <div class="setting_box">
