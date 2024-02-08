@@ -302,7 +302,7 @@
             <div class="box_tit">
               <h4>상담키워드</h4>
             </div>
-            <img src="{{wordcloud_base64}}" alt="" style="width: 80%;">
+<!--            <img src="{{wordcloud_base64}}" alt="" style="width: 80%;">-->
 
           </div>
         </div>
@@ -413,35 +413,35 @@
     });
 
 
-    var data = [
-      {% for item in avg_cnslt_context %}
-    {
-      "category_1": "{{ item.0 }}",
-            "category_2": "{{ item.1 }}",
-            "category_3": "{{ item.2 }}",
-            "average": "{{ item.3 }}",
-    },
-    {% endfor %}
-  ];
+  //   var data = [
+  //     {% for item in avg_cnslt_context %}
+  //   {
+  //     "category_1": "{{ item.0 }}",
+  //           "category_2": "{{ item.1 }}",
+  //           "category_3": "{{ item.2 }}",
+  //           "average": "{{ item.3 }}",
+  //   },
+  //   {% endfor %}
+  // ];
 
-    $("#cnslt_list").jqGrid({
-      datatype: 'local',
-      data:data,
-      colNames: ['대분류', '중분류', '소분류', '평균상담시간(초)'],
-      colModel: [
-        { name: 'category_1', width: 50, align: 'center' },
-        { name: 'category_2', width: 100, align: 'center' },
-        { name: 'category_3', width: 100, align: 'center' },
-        { name: 'average', width: 80, align: 'center'},
-      ],
-      autowidth: true,
-      rownumbers : false,
-      sortable: false,
-      height: 160,
-      cmTemplate: { sortable: false }
-    });
-
-  });
+  //   $("#cnslt_list").jqGrid({
+  //     datatype: 'local',
+  //     data:data,
+  //     colNames: ['대분류', '중분류', '소분류', '평균상담시간(초)'],
+  //     colModel: [
+  //       { name: 'category_1', width: 50, align: 'center' },
+  //       { name: 'category_2', width: 100, align: 'center' },
+  //       { name: 'category_3', width: 100, align: 'center' },
+  //       { name: 'average', width: 80, align: 'center'},
+  //     ],
+  //     autowidth: true,
+  //     rownumbers : false,
+  //     sortable: false,
+  //     height: 160,
+  //     cmTemplate: { sortable: false }
+  //   });
+  //
+  // });
 
   // 설정 팝업창 열기
   $(function(){
@@ -489,159 +489,190 @@
 
 
 
-  const ctx = document.getElementById('emotion_chart');
+  // const ctx = document.getElementById('emotion_chart');
+  //
+  // var pos = {{ pos_emotion|default:0 }}
+  // var neg = {{ neg_emotion|default:0 }}
+  // var emotion = {{ emotion|default:0 }}
+  //
+  // new Chart(ctx, {
+  //   type: 'doughnut',
+  //   data: {
+  //     labels: ['긍정', '부정','중립'],
+  //     datasets: [{
+  //       data: [pos, neg,emotion],
+  //       backgroundColor: [
+  //         'rgba(35, 94, 232, 1)',
+  //         'rgba(224, 227, 232, 1)',
+  //         'rgba(2, 155, 212, 1)',
+  //       ],
+  //       cutout: "70%",
+  //     }]
+  //   },
+  //   options: {
+  //     responsive: false,
+  //     plugins: {
+  //       legend: {
+  //         display: true,
+  //         position: 'left', // 범례를 왼쪽에 표시하도록 설정
+  //       }
+  //     }
+  //   }
+  // });
+  //
+  // const age_ctx = document.getElementById('age_chart');
+  // var sec_len = {{ sec_len|default:0 }}
+  // var thr_len = {{ thr_len|default:0 }}
+  // var four_len = {{ four_len |default:0 }}
+  // var five_len = {{ five_len |default:0 }}
+  // var six_len = {{ six_len |default:0 }}
+  //
+  // new Chart(age_ctx, {
+  //   type: 'doughnut',
+  //   data: {
+  //     labels: ['20대','30대', '40대', '50대', '60대'],
+  //     datasets: [{
+  //       data: [sec_len,thr_len, four_len, five_len, six_len],
+  //       backgroundColor: [
+  //         'rgba(143, 101, 220, 1)',
+  //         'rgba(35, 94, 232, 1)',
+  //         'rgba(2, 155, 212, 1)',
+  //         'rgba(83, 215, 230, 1)',
+  //         'rgba(224, 227, 232, 1)'
+  //       ],
+  //       cutout: "70%",
+  //     }]
+  //   },
+  //   options: {
+  //     responsive: false,
+  //     plugins: {
+  //       legend: {
+  //         display: true,
+  //         position: 'left', // 범례를 왼쪽에 표시하도록 설정
+  //       }
+  //     }
+  //   }
+  //
+  // });
 
-  var pos = {{ pos_emotion|default:0 }}
-  var neg = {{ neg_emotion|default:0 }}
-  var emotion = {{ emotion|default:0 }}
+  // const gender_ctx = document.getElementById('gender_chart');
+  //
+  // // var male = {{ male_len|default:0  }}
+  // // var female = {{ female_len|default:0 }}
+  //
+  // new Chart(gender_ctx, {
+  //   type: 'doughnut',
+  //   data: {
+  //     labels: ['여성', '남성'],
+  //     datasets: [{
+  //       data: [10,20],
+  //       backgroundColor: [
+  //         'rgba(35, 94, 232, 1)',
+  //         'rgba(83, 215, 230, 1)'
+  //       ],
+  //       cutout: "70%",
+  //     }]
+  //   },
+  //   options: {
+  //     responsive: false,
+  //     plugins: {
+  //       legend: {
+  //         display: true,
+  //         position: 'left', // 범례를 왼쪽에 표시하도록 설정
+  //       }
+  //     }
+  //   }
+  //
+  // });
 
-  new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['긍정', '부정','중립'],
-      datasets: [{
-        data: [pos, neg,emotion],
-        backgroundColor: [
-          'rgba(35, 94, 232, 1)',
-          'rgba(224, 227, 232, 1)',
-          'rgba(2, 155, 212, 1)',
-        ],
-        cutout: "70%",
-      }]
-    },
-    options: {
-      responsive: false,
-      plugins: {
-        legend: {
-          display: true,
-          position: 'left', // 범례를 왼쪽에 표시하도록 설정
+  // const time_series_ctx = document.getElementById('time_series_chart');
+  // const context = {{ result_context|safe }};
+  //
+  // // JavaScript에서 context 데이터 가공
+  // const outputDiv = document.getElementById("result_context");
+  //
+  // const chartData={};
+  //
+  // context.forEach(entry => {
+  //   const { month, type, count } = entry;
+  //   if (!chartData[month]) {
+  //     chartData[month] = [];
+  //   }
+  //   chartData[month].push({ type, count: parseInt(count) });
+  // });
+  //
+  // const labels = Object.keys(chartData).map(month => `${month} 월`);
+  // const datasets = [];
+  //
+  // Object.keys(chartData).forEach(month => {
+  //   const categories = chartData[month];
+  //   const topCategories = categories
+  //           .sort((a, b) => b.count - a.count)
+  //           .slice(0, 3);
+  //
+  //   topCategories.forEach((category, index) => {
+  //     if (!datasets[index]) {
+  //       // 아래 색상 배열에는 원하는 색상을 나열합니다.
+  //       const colors = ['rgba(143, 101, 220, 1)', 'rgba(35, 94, 232, 1)', 'rgba(2, 155, 212, 1)'];
+  //
+  //       datasets[index] = {
+  //         label: category.type,
+  //         data: [category.count],
+  //         backgroundColor: colors[index],
+  //         borderWidth: 1
+  //       };
+  //     } else {
+  //       datasets[index].data.push(category.count);
+  //     }
+  //   });
+  // });
+  //
+  // const myChart = new Chart(time_series_ctx, {
+  //   type: 'bar',
+  //   data: {
+  //     labels: labels,
+  //     datasets: datasets
+  //   },
+  //   options: {
+  //     responsive: false,
+  //     scales: {
+  //       y: {
+  //         beginAtZero: true
+  //       }
+  //     }
+  //   }
+  // });
+</script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const gender_ctx = document.getElementById('gender_chart');
+    // var male_len = [[${male_len}]]; // 남성 데이터
+    // var female_len = [[${female_len}]]; // 여성 데이터
+
+    new Chart(gender_ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['여성', '남성'],
+            datasets: [{
+                data: [10,20],
+                backgroundColor: [
+                    'rgba(35, 94, 232, 1)',
+                    'rgba(83, 215, 230, 1)'
+                ]
+            }]
+        },
+        options: {
+            responsive: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'left', // 범례를 왼쪽에 표시
+                }
+            }
         }
-      }
-    }
-  });
-
-  const age_ctx = document.getElementById('age_chart');
-  var sec_len = {{ sec_len|default:0 }}
-  var thr_len = {{ thr_len|default:0 }}
-  var four_len = {{ four_len |default:0 }}
-  var five_len = {{ five_len |default:0 }}
-  var six_len = {{ six_len |default:0 }}
-
-  new Chart(age_ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['20대','30대', '40대', '50대', '60대'],
-      datasets: [{
-        data: [sec_len,thr_len, four_len, five_len, six_len],
-        backgroundColor: [
-          'rgba(143, 101, 220, 1)',
-          'rgba(35, 94, 232, 1)',
-          'rgba(2, 155, 212, 1)',
-          'rgba(83, 215, 230, 1)',
-          'rgba(224, 227, 232, 1)'
-        ],
-        cutout: "70%",
-      }]
-    },
-    options: {
-      responsive: false,
-      plugins: {
-        legend: {
-          display: true,
-          position: 'left', // 범례를 왼쪽에 표시하도록 설정
-        }
-      }
-    }
-
-  });
-
-  const gender_ctx = document.getElementById('gender_chart');
-
-  var male = {{ male_len|default:0  }}
-  var female = {{ female_len|default:0 }}
-
-  new Chart(gender_ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['여성', '남성'],
-      datasets: [{
-        data: [female, male],
-        backgroundColor: [
-          'rgba(35, 94, 232, 1)',
-          'rgba(83, 215, 230, 1)'
-        ],
-        cutout: "70%",
-      }]
-    },
-    options: {
-      responsive: false,
-      plugins: {
-        legend: {
-          display: true,
-          position: 'left', // 범례를 왼쪽에 표시하도록 설정
-        }
-      }
-    }
-
-  });
-
-  const time_series_ctx = document.getElementById('time_series_chart');
-  const context = {{ result_context|safe }};
-
-  // JavaScript에서 context 데이터 가공
-  const outputDiv = document.getElementById("result_context");
-
-  const chartData={};
-
-  context.forEach(entry => {
-    const { month, type, count } = entry;
-    if (!chartData[month]) {
-      chartData[month] = [];
-    }
-    chartData[month].push({ type, count: parseInt(count) });
-  });
-
-  const labels = Object.keys(chartData).map(month => `${month} 월`);
-  const datasets = [];
-
-  Object.keys(chartData).forEach(month => {
-    const categories = chartData[month];
-    const topCategories = categories
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 3);
-
-    topCategories.forEach((category, index) => {
-      if (!datasets[index]) {
-        // 아래 색상 배열에는 원하는 색상을 나열합니다.
-        const colors = ['rgba(143, 101, 220, 1)', 'rgba(35, 94, 232, 1)', 'rgba(2, 155, 212, 1)'];
-
-        datasets[index] = {
-          label: category.type,
-          data: [category.count],
-          backgroundColor: colors[index],
-          borderWidth: 1
-        };
-      } else {
-        datasets[index].data.push(category.count);
-      }
     });
-  });
-
-  const myChart = new Chart(time_series_ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: datasets
-    },
-    options: {
-      responsive: false,
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
+    /*]]>*/
 </script>
 
 <script>

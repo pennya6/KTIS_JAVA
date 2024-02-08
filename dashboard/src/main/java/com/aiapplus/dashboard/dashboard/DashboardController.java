@@ -4,6 +4,7 @@ import com.aiapplus.dashboard.user.UserInfo;
 import com.aiapplus.dashboard.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +14,12 @@ import java.security.Principal;
 @Controller
 public class DashboardController {
     private final UserService userService;
+    private final SessionRegistry sessionRegistry;
+
     @Autowired
-    public DashboardController(UserService userService){
+    public DashboardController(UserService userService, SessionRegistry sessionRegistry){
         this.userService=userService;
+        this.sessionRegistry = sessionRegistry;
     }
 
     public String username(Principal principal){
