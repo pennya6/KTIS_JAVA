@@ -1,0 +1,702 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AIAP+ 대시보드</title>
+  <link rel="stylesheet" href="/resources/css/style.css">
+  <!--    font awesome-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!--    google font-->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!--  jqGrid-->
+  <script type="text/javascript" src="https://code.jquery.com/jquery-1.10.2.min.js" /></script>
+  <script type="text/javascript" src="https://code.jquery.com/ui/1.10.3/jquery-ui.min.js" /></script>
+  <link rel="stylesheet" type="text/css" href="/resources/js/jqgrid/css/ui.jqgrid.css" />
+  <script src="/resources/js/jqgrid/js/i18n/grid.locale-kr.js" type="text/javascript"></script>
+  <script src="/resources/js/jqgrid/js/minified/jquery.jqGrid.min.js" type="text/javascript"></script>
+  <!-- tree ui -->
+  <link rel="stylesheet" href="/resources/js/jstree/dist/themes/default/style.min.css" />
+  <script src="/resources/js/jstree/dist/jstree.min.js"></script>
+  <!--    datepicker-->
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- html2canvas 라이브러리-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.0/html2canvas.min.js"></script>
+  <style>
+    .step-b{
+      position: relative;
+      z-index: 9999;
+      top: 100px;
+      width: 190px;
+      line-height: 40px;
+      border: 1px solid #235ee8;
+      border-radius: 7px;
+      box-sizing: border-box;
+      overflow: hidden;
+      color: #235ee8;
+      background: #fff;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body id="screenshot">
+<div class="aside">
+  <div class="aside_wrap">
+    <div class="logo"><img src="/resources/img/common/kt-is-logo-c.png" alt="logo"></div>
+    <div class="menu">
+      <ul class="navbar-nav">
+<!--        {% if user_groups == "user"  %}-->
+<!--        <li class="on">-->
+<!--          <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/AI_AP_PLUS/">-->
+<!--            <i class="ni ni-tv-2 text-primary"></i>-->
+<!--            <span class="nav-link-text">대시보드</span>-->
+<!--          </a>-->
+<!--        </li>-->
+<!--        <li class="nav-item">-->
+<!--          <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/AI_AP_PLUS/data_analysis_result">-->
+<!--            <i class="ni ni-tv-2 text-primary"></i>-->
+<!--            <span class="nav-link-text">상담 추이</span>-->
+<!--          </a>-->
+<!--        </li>-->
+<!--        {% elif user_groups == "manager"%}-->
+<!--        <li class="on">-->
+<!--          <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/AI_AP_PLUS/">-->
+<!--            <i class="ni ni-tv-2 text-primary"></i>-->
+<!--            <span class="nav-link-text">대시보드</span>-->
+<!--          </a>-->
+<!--        </li>-->
+<!--        <li class="nav-item">-->
+<!--          <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/AI_AP_PLUS/data_analysis_result">-->
+<!--            <i class="ni ni-tv-2 text-primary"></i>-->
+<!--            <span class="nav-link-text">상담 추이</span>-->
+<!--          </a>-->
+<!--        </li>-->
+<!--        <li class="nav-item">-->
+<!--          <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/AI_AP_PLUS/stt_result">-->
+<!--            <i class="ni ni-tv-2 text-primary"></i>-->
+<!--            <span class="nav-link-text">상담녹취 결과</span>-->
+<!--          </a>-->
+<!--        </li>-->
+<!--        {% elif user_groups == "dev"  %}-->
+          <li class="on">
+              <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/dashboard}">
+                  <i class="ni ni-tv-2 text-primary"></i>
+                  <span class="nav-link-text">대시보드</span>
+              </a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/data_analysis_result}">
+                  <i class="ni ni-tv-2 text-primary"></i>
+                  <span class="nav-link-text">상담 추이</span>
+              </a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/stt_result}">
+                  <i class="ni ni-tv-2 text-primary"></i>
+                  <span class="nav-link-text">상담녹취 결과</span>
+              </a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/job}">
+                  <i class="ni ni-tv-2 text-primary"></i>
+                  <span class="nav-link-text">업무 관리</span>
+              </a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link {% if 'index' in segment %} active {% endif %}" th:href="@{/system_setting}">
+                  <i class="ni ni-tv-2 text-primary"></i>
+                  <span class="nav-link-text">시스템 설정</span>
+              </a>
+          </li>
+<!--        {% endif  %}-->
+    </div>
+  </div>
+</div>
+
+<div class="popup none">
+  <div class="popup_box">
+    <div class="popup_tit">개인정보 설정 <span class="close_btn"><i class="fa-solid fa-xmark"></i></span></div>
+    <div class="popup_con">
+      <div>
+        <div class="sett_wrap">
+          <div class="detail_tit">이름</div>
+          <div class="text_wrap"><div class="user_name">{{ request.user.last_name }}{{ request.user.first_name }}</div></div>
+        </div>
+        <div class="sett_wrap">
+          <div class="detail_tit">계정</div>
+          <div class="text_wrap"><div class="user_name">{{ request.user.username }}</div></div>
+        </div>
+        <div class="sett_wrap">
+          <div class="detail_tit">소속</div>
+          <div class="text_wrap"><div class="company_name">{{ request.user.department }}</div></div>
+        </div>
+        <div class="sett_wrap">
+          <div class="detail_tit">현재 비밀번호</div>
+          <div class="text_wrap"><input class="essen" type="text" name="current_password" id="current_password"></div>
+        </div>
+
+        <form method="post">
+
+          <div class="sett_wrap">
+            <div class="detail_tit">
+              <label for="new_password">새 비밀번호</label>
+            </div>
+            <div class="text_wrap"><input class="essen" type="text" name="new_password" id="new_password"></div>
+          </div>
+
+          <div class="sett_wrap">
+            <div class="detail_tit">비밀번호 확인</div>
+            <div class="text_wrap"><input class="essen" type="text" name="confirm_password" id="confirm_password"></div>
+          </div>
+
+          <div class="sett_wrap">
+            <div class="pop_btn_wrap" style="margin-top:50px;">
+              <button type="submit" class="ok_btn">변경</button>
+
+              <button class="cancel_btn">취소</button>
+            </div>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="content">
+    <div class="con_wrap" style="margin-bottom:0px;">
+      <div class="account_box">
+        <div class="user_img">
+<!--          {% if user_groups == "user" %}-->
+<!--          <img src="/static/assets/img/common/admin_img.png" alt="">-->
+<!--          {% elif user_groups == "manager"%}-->
+<!--          <img src="/static/assets/img/common/developer_img.png" alt="">-->
+<!--          {% elif user_groups == "dev" %}-->
+<!--          <img src="/static/assets/img/common/manage_img.png" alt="">-->
+<!--          {% endif %}-->
+        </div>
+        <div class="user_box">
+          <div th:text="${username}">님</div>
+          <div class="access_time">{{request.user.last_login|date:"Y-m-d H:i:s"}}</div>
+        </div>
+        <div class="setting_box">
+          <button class="setting_btn"><i class="fa-solid fa-gear"></i></button>
+        </div>
+        <div class="logout_box">
+          <a  th:href="@{/user/logout}" class="logout_btn">
+            <i class="ni ni-support-16"></i>
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="con_wrap" style="overflow: visible; margin-top:0; margin-bottom:0;">
+      <div class="filter_box">
+        <div class="filter_tit"><p>대시보드 검색조회</p></div>
+        <form method="POST" action="">
+<!--          {% csrf_token %}-->
+          <div class="date_select">
+            <input type="text" name="start_date"id="start_date" value="{{start_date}}" placeholder="날짜 선택" readonly>
+            <div>~</div>
+            <input type="text" name="end_date"id="end_date" value="{{end_date}}" placeholder="날짜 선택" readonly>
+          </div>
+
+          <div class="type_select">
+            <div class="type_tit">상담유형선택</div>
+            <div class="type_check">
+              <div class="step1 step-a">
+                <ul>
+<!--                  {% for cnslttype in cnslttype_items %}-->
+<!--                  {% if cnslttype.level == 0 %}-->
+                  <li>
+                    <input type="checkbox" id="cnslttype_{{cnslttype.type_id}}" data-level="{{cnslttype.level}}" name="category1" value="{{cnslttype.type_nm}}" onclick="stepCheckboxClickEvent('.step1', this, 'top');"><label for="cnslttype_{{cnslttype.type_id}}" class="cb1"><span>{{cnslttype.type_nm}}</span></label>
+                  </li>
+<!--                  {% endif %}-->
+<!--                  {% endfor %}-->
+                </ul>
+              </div>
+            </div>
+
+            <div class="type_check-2">
+<!--              {% for cnslttype_group in cnslttype_group_items %}-->
+              <div class="step{{cnslttype_group.type_id}}-1 step-b" style= "display: none;">
+                <ul>
+<!--                  {% for cnslttype in cnslttype_items %}-->
+<!--                  {% if cnslttype.parent_type_id == cnslttype_group.type_id %}-->
+                  <li>
+                    <input type="checkbox" id="cnslttype_{{cnslttype.type_id}}" data-level="{{cnslttype.level}}" parent-id="{{cnslttype.parent_type_id}}" name="category2" value="{{cnslttype.type_nm}}" onclick="stepCheckboxClickEvent('.step{{cnslttype_group.type_id}}-1', this);"><label for="cnslttype_{{cnslttype.type_id}}" class="cb1"><span>{{cnslttype.type_nm}}</span></label>
+                  </li>
+<!--                  {% endif %}-->
+<!--                  {% endfor %}-->
+                </ul>
+              </div>
+<!--              {% endfor %}-->
+            </div>
+          </div>
+
+          <div class="line"></div>
+          <button id="submit_button" class="search_btn" type="button"><i class="fa-solid fa-magnifying-glass"></i> 조회</button>
+          <button id="save" class="export_btn"><i class="fa-regular fa-image"></i> Export</button>
+      </div>
+      </form>
+    </div>
+    <div class="con_wrap" id="export_img">
+      <div class="con_box">
+        <div class="box_3">
+          <div class="box_wrap">
+            <div class="box_tit">
+              <h4>성별</h4>
+              <p align="center">
+                <canvas id="gender_chart" width="300" height="180"></canvas>
+              </p>
+            </div>
+            <p class="card-text">
+          </div>
+        </div>
+        <div class="box_3">
+          <div class="box_wrap">
+            <div class="box_tit">
+              <h4>연령</h4>
+              <p align="center">
+                <canvas id="age_chart" width="300" height="180"></canvas>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="box_3">
+          <div class="box_wrap">
+            <div class="box_tit">
+              <h4>긍부정</h4>
+              <p align="center">
+                <canvas id="emotion_chart" width="300" height="180"></canvas>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="con_box_half">
+        <div class="box_1">
+          <div class="box_wrap">
+            <div class="box_tit">
+              <h4>상담통계</h4>
+            </div>
+            <canvas id="time_series_chart" style="position:relative; height:20vh; width:35vw; margin:0 auto;" ></canvas>
+          </div>
+        </div>
+        <div class="box_1">
+          <div class="box_wrap">
+            <div class="box_tit">
+              <h4>평균 상담시간</h4>
+            </div>
+            <table id="cnslt_list"></table>
+            <div id="pager"></div>
+          </div>
+        </div>
+      </div>
+      <div class="con_box_half">
+        <div class="box_1" style="height: 515px;">
+          <div class="box_wrap">
+            <div class="box_tit">
+              <h4>상담키워드</h4>
+            </div>
+<!--            <img src="{{wordcloud_base64}}" alt="" style="width: 80%;">-->
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>
+<script>
+  let select_type_1 = "{{category1}}" ? "{{category1}}" : "";
+  let select_type_2 = "{{category2}}" ? "{{category2}}" : "";
+
+  function stepCheckboxClickEvent (checkboxClassName, element, level) {
+
+    let stepCheckbox = $(checkboxClassName + " input:checked[type='checkbox']");
+    let count = (stepCheckbox) ? stepCheckbox.length : 0;
+
+    if(count > 1){
+      stepCheckbox.prop("checked",false);
+      $(element).prop("checked",true);
+    }
+
+    if(level && "top" === level) {
+      let stepBCheckbox = $(".step-b input:checked[type='checkbox']");
+      stepBCheckbox.prop("checked", false);
+    }
+  };
+
+  $(document).ready(function() {
+    // 상담유형선택 ui
+    $('.type_tit').click(function() {
+      let cnslt_dept_1 = $('.type_check');
+      let cnslt_dept_2 = $('.type_check-2');
+
+      cnslt_dept_1.toggle();
+      cnslt_dept_2.css('display', 'none');
+
+      // 조회 시 선택된 값 세팅
+      if(select_type_1 && select_type_1 !=""){
+        $('.step-a > ul > li').each(function(index, el){
+          if($(el).find('input[type="checkbox"]').val() == select_type_1){
+            let id = $(el).find('input[type="checkbox"]').attr('id').replace("cnslttype_", "");
+            $(el).find('input[type="checkbox"]').prop("checked", true);
+            $(`.step${id}-1`).show();
+          }
+        })
+
+        if(cnslt_dept_1.css("display") != "none"){
+          cnslt_dept_2.css('display', '');
+          $('.step-b > ul > li').each(function(index, el_sub){
+            if($(el_sub).find('input[type="checkbox"]').val() == select_type_2){
+              $(el_sub).find('input[type="checkbox"]').prop("checked", true);
+            }
+          })
+        }
+      }
+    });
+
+
+    // 상담유형 Depth 1 선택 시 이벤트
+    $('.step-a ul li').off('click').on('click',function() {
+      // 체크가 해제되도록 설정
+      let curr_val = $(this).find('input[type="checkbox"]').val();
+      let id = $(this).find('input[type="checkbox"]').attr('id').replace("cnslttype_", "");
+      let cnslt_dept_1 = $('.type_check');
+      let cnslt_dept_2 = $('.type_check-2');
+      let cnslt_dept_2_sub = $('.step-b');
+
+      $('.step-a ul li').each(function(index, el){
+        if($(el).find('input[type="checkbox"]').val() == curr_val){
+          $(el).prop('checked', true);
+        }
+        else{
+          $(el).prop('checked', false);
+        }
+      });
+
+      select_type_1 = "";
+      if($(this).find('input[type="checkbox"]').is(':checked')){
+        select_type_1 = $(this).find('input[type="checkbox"]').val();
+      }
+
+      cnslt_dept_2.css("display", "none");
+      cnslt_dept_2_sub.css("display", "none");
+      if(select_type_1 != ""){
+        cnslt_dept_2.css("display", "");
+        $(`.step${id}-1`).show();
+      }
+      else{
+        select_type_2 = "";
+        cnslt_dept_2.css("display", "none");
+      }
+
+    });
+
+    // 상담유형 Depth 2 선택 시 이벤트
+    $('.step-b ul li').off('click').on('click',function() {
+      // 체크가 해제되도록 설정
+      let curr_val = $(this).find('input[type="checkbox"]').val();
+      if($(this).find('input[type="checkbox"]').is(":checked")){
+        select_type_2 = curr_val;
+      }else{
+        select_type_2 = "";
+      }
+    });
+
+
+  //   var data = [
+  //     {% for item in avg_cnslt_context %}
+  //   {
+  //     "category_1": "{{ item.0 }}",
+  //           "category_2": "{{ item.1 }}",
+  //           "category_3": "{{ item.2 }}",
+  //           "average": "{{ item.3 }}",
+  //   },
+  //   {% endfor %}
+  // ];
+
+  //   $("#cnslt_list").jqGrid({
+  //     datatype: 'local',
+  //     data:data,
+  //     colNames: ['대분류', '중분류', '소분류', '평균상담시간(초)'],
+  //     colModel: [
+  //       { name: 'category_1', width: 50, align: 'center' },
+  //       { name: 'category_2', width: 100, align: 'center' },
+  //       { name: 'category_3', width: 100, align: 'center' },
+  //       { name: 'average', width: 80, align: 'center'},
+  //     ],
+  //     autowidth: true,
+  //     rownumbers : false,
+  //     sortable: false,
+  //     height: 160,
+  //     cmTemplate: { sortable: false }
+  //   });
+  //
+  // });
+
+  // 설정 팝업창 열기
+  $(function(){
+    $(".setting_btn").click(function(){
+      $(".popup").addClass("block");
+      $(".popup_bg").addClass("block");
+    });
+  });
+
+  // 설정 팝업창 닫기
+  $(function(){
+    $(".close_btn").click(function(){
+      $(".popup").addClass("none");
+      $(".popup_bg").addClass("none");
+      $(".popup").removeClass("block");
+      $(".popup_bg").removeClass("block");
+    });
+  });
+
+  // 설정 팝업창 닫기
+  $(function(){
+    $(".cancel_btn").click(function(){
+      $(".popup").addClass("none");
+      $(".popup_bg").addClass("none");
+      $(".popup").removeClass("block");
+      $(".popup_bg").removeClass("block");
+    });
+  });
+
+  $(function(){
+    $("#start_date, #end_date").datepicker({
+      dateFormat:"yy-mm-dd"
+    });
+
+    $("#submit_button").on("click", function () {
+      let start_date = $("#start_date").val() ? $("#start_date").val() : "";
+      let end_date = $("#end_date").val() ? $("#end_date").val() : "";
+      let category1 = select_type_1 ? select_type_1 : "";
+      let category2 = select_type_2 ? select_type_2 : "";
+
+      location.href=`?start_date=${start_date}&end_date=${end_date}&category1=${category1}&category2=${category2}`
+
+    })
+  });
+
+
+
+  // const ctx = document.getElementById('emotion_chart');
+  //
+  // var pos = {{ pos_emotion|default:0 }}
+  // var neg = {{ neg_emotion|default:0 }}
+  // var emotion = {{ emotion|default:0 }}
+  //
+  // new Chart(ctx, {
+  //   type: 'doughnut',
+  //   data: {
+  //     labels: ['긍정', '부정','중립'],
+  //     datasets: [{
+  //       data: [pos, neg,emotion],
+  //       backgroundColor: [
+  //         'rgba(35, 94, 232, 1)',
+  //         'rgba(224, 227, 232, 1)',
+  //         'rgba(2, 155, 212, 1)',
+  //       ],
+  //       cutout: "70%",
+  //     }]
+  //   },
+  //   options: {
+  //     responsive: false,
+  //     plugins: {
+  //       legend: {
+  //         display: true,
+  //         position: 'left', // 범례를 왼쪽에 표시하도록 설정
+  //       }
+  //     }
+  //   }
+  // });
+  //
+  // const age_ctx = document.getElementById('age_chart');
+  // var sec_len = {{ sec_len|default:0 }}
+  // var thr_len = {{ thr_len|default:0 }}
+  // var four_len = {{ four_len |default:0 }}
+  // var five_len = {{ five_len |default:0 }}
+  // var six_len = {{ six_len |default:0 }}
+  //
+  // new Chart(age_ctx, {
+  //   type: 'doughnut',
+  //   data: {
+  //     labels: ['20대','30대', '40대', '50대', '60대'],
+  //     datasets: [{
+  //       data: [sec_len,thr_len, four_len, five_len, six_len],
+  //       backgroundColor: [
+  //         'rgba(143, 101, 220, 1)',
+  //         'rgba(35, 94, 232, 1)',
+  //         'rgba(2, 155, 212, 1)',
+  //         'rgba(83, 215, 230, 1)',
+  //         'rgba(224, 227, 232, 1)'
+  //       ],
+  //       cutout: "70%",
+  //     }]
+  //   },
+  //   options: {
+  //     responsive: false,
+  //     plugins: {
+  //       legend: {
+  //         display: true,
+  //         position: 'left', // 범례를 왼쪽에 표시하도록 설정
+  //       }
+  //     }
+  //   }
+  //
+  // });
+
+  // const gender_ctx = document.getElementById('gender_chart');
+  //
+  // // var male = {{ male_len|default:0  }}
+  // // var female = {{ female_len|default:0 }}
+  //
+  // new Chart(gender_ctx, {
+  //   type: 'doughnut',
+  //   data: {
+  //     labels: ['여성', '남성'],
+  //     datasets: [{
+  //       data: [10,20],
+  //       backgroundColor: [
+  //         'rgba(35, 94, 232, 1)',
+  //         'rgba(83, 215, 230, 1)'
+  //       ],
+  //       cutout: "70%",
+  //     }]
+  //   },
+  //   options: {
+  //     responsive: false,
+  //     plugins: {
+  //       legend: {
+  //         display: true,
+  //         position: 'left', // 범례를 왼쪽에 표시하도록 설정
+  //       }
+  //     }
+  //   }
+  //
+  // });
+
+  // const time_series_ctx = document.getElementById('time_series_chart');
+  // const context = {{ result_context|safe }};
+  //
+  // // JavaScript에서 context 데이터 가공
+  // const outputDiv = document.getElementById("result_context");
+  //
+  // const chartData={};
+  //
+  // context.forEach(entry => {
+  //   const { month, type, count } = entry;
+  //   if (!chartData[month]) {
+  //     chartData[month] = [];
+  //   }
+  //   chartData[month].push({ type, count: parseInt(count) });
+  // });
+  //
+  // const labels = Object.keys(chartData).map(month => `${month} 월`);
+  // const datasets = [];
+  //
+  // Object.keys(chartData).forEach(month => {
+  //   const categories = chartData[month];
+  //   const topCategories = categories
+  //           .sort((a, b) => b.count - a.count)
+  //           .slice(0, 3);
+  //
+  //   topCategories.forEach((category, index) => {
+  //     if (!datasets[index]) {
+  //       // 아래 색상 배열에는 원하는 색상을 나열합니다.
+  //       const colors = ['rgba(143, 101, 220, 1)', 'rgba(35, 94, 232, 1)', 'rgba(2, 155, 212, 1)'];
+  //
+  //       datasets[index] = {
+  //         label: category.type,
+  //         data: [category.count],
+  //         backgroundColor: colors[index],
+  //         borderWidth: 1
+  //       };
+  //     } else {
+  //       datasets[index].data.push(category.count);
+  //     }
+  //   });
+  // });
+  //
+  // const myChart = new Chart(time_series_ctx, {
+  //   type: 'bar',
+  //   data: {
+  //     labels: labels,
+  //     datasets: datasets
+  //   },
+  //   options: {
+  //     responsive: false,
+  //     scales: {
+  //       y: {
+  //         beginAtZero: true
+  //       }
+  //     }
+  //   }
+  // });
+</script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const gender_ctx = document.getElementById('gender_chart');
+    // var male_len = [[${male_len}]]; // 남성 데이터
+    // var female_len = [[${female_len}]]; // 여성 데이터
+
+    new Chart(gender_ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['여성', '남성'],
+            datasets: [{
+                data: [10,20],
+                backgroundColor: [
+                    'rgba(35, 94, 232, 1)',
+                    'rgba(83, 215, 230, 1)'
+                ]
+            }]
+        },
+        options: {
+            responsive: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'left', // 범례를 왼쪽에 표시
+                }
+            }
+        }
+    });
+    /*]]>*/
+</script>
+
+<script>
+  // Export 버튼을 클릭했을 때 실행될 함수
+  $(document).on('click', '.export_btn', function(){
+    event.preventDefault(); //폼 제출 막기 (새로고침 하는 듯한 동작X)
+
+    console.log("here")
+    // 특정 부분을 캡처하고 이미지로 만드는 코드
+    html2canvas(document.getElementById('export_img')).then(function(canvas) {
+      // 캡처한 이미지 데이터를 데이터 URL로 변환
+      var imageData = canvas.toDataURL('image/png');
+      console.log("create image")
+
+      // 이미지 다운로드를 위한 a 태그 생성
+      var downloadLink = document.createElement('a');
+      downloadLink.href = imageData;
+      downloadLink.download = 'image.png';
+
+      // a 태그를 body에 추가하고 자동으로 클릭하여 다운로드 실행
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    });
+  });
+
+</script>

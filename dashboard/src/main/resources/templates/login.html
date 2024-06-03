@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}"
+      xmlns:layout="http://www.w3.org/1999/xhtml" >
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Login</title>
+    <link rel="stylesheet" href="/resources/css/login.css">
+</head>
+<body>
+<form method="post" th:action="@{/}">
+    <div th:if="${param.error}">
+        <div class="alert alert-danger">
+            사용자ID 또는 비밀번호를 확인해 주세요.
+        </div>
+    </div>
+    <div class="login_bg">
+        <div class="login_wrap">
+            <div class="login_box">
+                <div class="login_logo">
+                    <img src="/resources/img/common/kt-is-logo-c.png" alt="logo">
+                </div>
+                <div class="login_id">
+                    <label for="username" class="form-label">id</label>
+                    <input id="username" type="text" name="username" class="form-control">
+                </div>
+                <div class="login_pw">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password"class="form-control">
+                </div>
+                <div class="line"></div>
+                <div class="login_button">
+                    <button type="submit">Login</button>
+                </div>
+                <div class="find">
+                    <div>
+                        <a th:href="@{/signup}">회원가입</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="login_tit">
+            <div class="fade_in">
+                <h1>직관적이고 간편하게</h1>
+                <p>데이터를 다양한 차트로 시각화하여 인사이트를 발견하는데 도움이 됩니다. <br>
+                    또한, 필터링 기능과 상호작용 가능한 그래프로 데이터 탐색을 더욱 효과적으로 만들어줍니다.</p>
+            </div>
+        </div>
+    </div>
+</form>
+</body>
+</html>
