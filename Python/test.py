@@ -1,13 +1,14 @@
 import requests
 
-url = 'http://127.0.0.1:5000/sign-up'
+url = 'http://127.0.0.1:5000/predict'
 data = {
-    'name': '홍길동',
-    'email': 'gildong@naver.com',
-    'password': 'abcd1234'
+    'sepal_length': '5.1',
+    'petal_length': '1.4',
+    'petal_width': '0.2',
+    'sepal_width': '0.5'
 }
 
-response = requests.post(url, data=data)
+response = requests.get(url, data=data)
 
 print(response.status_code)
 print(response.text)
